@@ -1,0 +1,134 @@
+<div *ngIf="driver; else loading" class="driver-profile-container">
+
+  <!-- 🔹 Top Section: Left = Driver Info | Right = Payment Form -->
+  <div class="top-section">
+
+    <!-- LEFT: DRIVER PROFILE -->
+    <div class="driver-info">
+      <h2>{{ driver.name }}</h2>
+      <p><strong>Driver SR:</strong> {{driver.srNumber }}</p>
+      <p><strong>Car Number:</strong> {{ driver.carNumber }}</p>
+      <p><strong>Mobile:</strong> {{ driver.mobile }}</p>
+      <P *ngIf="driver.location"><strong>Location: </strong>{{ driver.location }}</P>
+    </div>
+
+    <!-- RIGHT: PAYMENT ENTRY FORM -->
+    <div class="payment-form">
+      <h3>Add Payment / Commission</h3>
+
+      <form (ngSubmit)="addCommission()" #commissionForm="ngForm">
+
+        <label>Party Amount:</label>
+        <input type="number" [(ngModel)]="newCommission.partyAmount" name="partyAmount" required class="form-control" />
+
+        <label>Commission Amount:</label>
+        <input type="number" [(ngModel)]="newCommission.commissionAmount" name="commissionAmount" required
+          class="form-control" />
+        <label>Description:</label>
+        <textarea [(ngModel)]="newCommission.description" name="description" class="form-control" rows="2"></textarea>
+
+        <label>Status:</label>
+        <select [(ngModel)]="newCommission.status" name="status" required class="form-control">
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+        </select>
+
+        <button type="submit" class="btn-orange mt-2">Save</button>
+      </form>
+    </div>
+
+  </div>
+<div class="filter-bar">
+  <select [(ngModel)]="selectedMonth" (change)="filterByMonthYear()">
+    <option value="">All Months</option>
+    <option *ngFor="let m of months; let i = index" [value]="i">
+      {{ m }}
+    </option>
+  </select>
+
+  <select [(ngModel)]="selectedYear" (change)="filterByMonthYear()">
+    <option value="">All Years</option>
+    <option *ngFor="let y of years" [value]="y">
+      {{ y }}
+    </option>
+  </select>
+</div>
+
+  <!-- 🔹 Bottom: Commission Entries List -->
+  <div class="bottom-section">
+    <h3>Commission Entries</h3>
+    <table class="table table-bordered" *ngIf="commissions.length > 0; else noData">
+      <thead>
+        <tr>
+          <th>Party Amount</th>
+          <th>Commission Amount</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th>Branch</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of commissions">
+          <td>₹{{ c.partyAmount }}</td>
+          <td>₹{{ c.driverCommisionAmount }}</td>
+          <td>{{ c.status }}</td>
+          <td>{{ c.description || '-' }}</td>
+          <td>{{ c.createdAt | date:'dd/MM/yyyy, h:mm a' }}</td>
+          <td>{{ c.branchName || '-' }}</td>
+          <td>
+            <button class="btn-edit" (click)="openEditModal(c)">Edit</button>
+          </td>
+          <td> <button class="btn-green" (click)="sendWhatsAppReminder(c)">WhatsApp</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noData>
+      <p>No commission entries found.</p>
+    </ng-template>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p>Loading driver profile...</p>
+</ng-template>
+
+<!-- 🔹 Edit Modal -->
+<div class="modal" *ngIf="editModal">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <h4>Edit Commission Entry</h4>
+
+      <label>Party Amount:</label>
+      <input type="number" [(ngModel)]="editCommission.partyAmount" class="form-control" />
+
+      <label>Commission Amount:</label>
+      <input type="number" [(ngModel)]="editCommission.driverCommisionAmount" class="form-control" />
+
+      <label>Description:</label>
+      <textarea [(ngModel)]="editCommission.description" class="form-control" rows="2"></textarea>
+
+
+      <label>Status:</label>
+      <select [(ngModel)]="editCommission.status" class="form-control">
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+      </select>
+
+      <div class="modal-buttons">
+        <button class="btn-orange" (click)="updateCommission()">Update</button>
+        <button class="btn-secondary" (click)="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Global Toast -->
+<div class="toast-box" [class.show]="toast.show" [ngClass]="toast.type">
+  <div class="toast-icon">
+    <span *ngIf="toast.type === 'success'">✔</span>
+    <span *ngIf="toast.type === 'error'">✖</span>
+  </div>
+  <div class="toast-message">{{ toast.message }}</div>
+</div>

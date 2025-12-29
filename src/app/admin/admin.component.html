@@ -1,0 +1,104 @@
+<div class="staff-container">
+
+  <h2>Staff List</h2>
+
+  <div class="actions">
+    <input type="text" placeholder="Search by name or mobile..." [(ngModel)]="searchTerm" (input)="searchStaff()" />
+    <button (click)="openAddModal()">+ Add Staff</button>
+  </div>
+  <div class="staff-summary-buttons">
+    <button [class.active]="selectedBranch === ''" (click)="filterByBranch('')">
+      Total Staff ({{ totalStaff }})
+    </button>
+
+    <button [class.active]="selectedBranch === 'Gokulpura'" (click)="filterByBranch('Gokulpura')">
+      Gokulpura ({{ gokulpuraCount }})
+    </button>
+
+    <button [class.active]="selectedBranch === 'Sikar'" (click)="filterByBranch('Sikar')">
+      Sikar ({{ sikarCount }})
+    </button>
+
+    <button [class.active]="selectedBranch === 'Sanwali'" (click)="filterByBranch('Sanwali')">
+      Sanwali ({{ sanwaliCount }})
+    </button>
+  </div>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>SR</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Branch</th>
+        <th>Aadhar</th>
+        <th>City</th>
+        <th>DOB</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let s of filteredStaff; let i = index" (click)="goToProfile(s.staffId)">
+        <td>{{ i + 1 }}</td>
+        <td>{{ s.firstName }} {{ s.lastName }}</td>
+        <td>{{ s.mobile }}</td>
+        <td>{{ s.branchName }}</td>
+        <td>{{ s.adharNumber }}</td>
+        <td>{{ s.address?.city }}</td>
+        <td>{{ s.DOB | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <button class="edit-btn" (click)="openEditModal(s); $event.stopPropagation()">
+            Edit
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ADD / EDIT MODAL -->
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-content">
+      <h3>{{ isEditMode ? 'Edit Staff' : 'Add New Staff' }}</h3>
+
+      <input placeholder="First Name" [(ngModel)]="newStaff.firstName" />
+      <input placeholder="Last Name" [(ngModel)]="newStaff.lastName" />
+      <input placeholder="Mobile" [(ngModel)]="newStaff.mobile" />
+      <input placeholder="Aadhar Number" [(ngModel)]="newStaff.adharNumber" />
+      <input type="date" [(ngModel)]="newStaff.DOB" />
+      <input placeholder="City" [(ngModel)]="newStaff.address.city" />
+      <label>Branch</label>
+      <select [(ngModel)]="newStaff.branchName">
+        <option value="">Select Branch</option>
+        <option value="Gokulpura">Gokulpura</option>
+        <option value="Sikar">Sikar</option>
+        <option value="Sanwali">Sanwali</option>
+      </select>
+      <label>Salary</label>
+      <input type="number" placeholder="Salary" [(ngModel)]="newStaff.salary" />
+
+
+
+      <!-- Profile Image -->
+      <label>Profile Image</label>
+      <ng-container *ngIf="profileImagePreview">
+        <img [src]="profileImagePreview" class="img-preview">
+      </ng-container>
+      <input type="file" (change)="onProfileImageSelect($event)">
+
+      <!-- ID Proof Image -->
+      <label>ID Proof Image</label>
+      <ng-container *ngIf="idProofImagePreview">
+        <img [src]="idProofImagePreview" class="img-preview">
+      </ng-container>
+      <input type="file" (change)="onIdProofImageSelect($event)">
+
+      <div class="modal-actions">
+        <button *ngIf="!isEditMode" (click)="addStaff()">Save</button>
+        <button *ngIf="isEditMode" (click)="updateStaff()">Update</button>
+        <button (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

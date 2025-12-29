@@ -1,0 +1,28 @@
+
+<div class="header">
+    <h2>📒 Personal Khatabook</h2>
+</div>
+
+<div class="top-bar">
+    <input type="text" placeholder="Search by name or mobile..." [(ngModel)]="searchText" (input)="searchPeople()" />
+    <button (click)="showAddForm = true">+ Add Person</button>
+</div>
+
+<div class="form-overlay" *ngIf="showAddForm">
+    <div class="add-form">
+        <h3>Add Person</h3>
+
+        <input type="text" placeholder="Name" [(ngModel)]="newPerson.name" />
+        <input type="text" placeholder="Mobile" [(ngModel)]="newPerson.mobile" />
+        <div class="form-actions">
+            <button class="save" (click)="addPerson()">Save</button>
+            <button class="cancel" (click)="showAddForm = false">Cancel</button>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="card" *ngFor="let p of filteredList"   (click)="openProfile(p.personalTransectionalUserId)">
+        <h3>{{ p.name }}</h3>
+        <p>📞 {{ p.mobile }}</p>
+    </div>
+</div>

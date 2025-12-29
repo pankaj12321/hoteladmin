@@ -1,0 +1,186 @@
+<!-- ================= PROFILE ================= -->
+<div *ngIf="customerData" class="profile-box">
+  <h2>{{ customerData.name }}</h2>
+  <p><b>Mobile:</b> {{ customerData.mobile }}</p>
+  <p><b>City:</b> {{ customerData.city || '-' }}</p>
+  <p><b>Customer ID:</b> {{ customerData.personalCustomerRecordTranId }}</p>
+
+  
+
+  <div class="action-buttons">
+    <button class="btn-given" (click)="openModal('given')">+ Given to Customer</button>
+    <button class="btn-taken" (click)="openModal('taken')">+ Taken from Customer</button>
+  </div>
+</div>
+
+<hr>
+
+<!-- ================= TRANSACTION LIST LEFT-RIGHT ================= -->
+<div class="tran-container">
+  <!-- GIVEN TRANSACTIONS -->
+  <div class="tran-box">
+    <h3>Given to Customer</h3>
+    <table *ngIf="transactionsGiven.length > 0" class="tran-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Amount</th>
+          <th>Mode</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th>Bill No</th>
+          <th>Bill</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of transactionsGiven; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>₹ {{ t.Rs }}</td>
+          <td>{{ t.paymentMode }}</td>
+          <td>{{ t.description || '-' }}</td>
+          <td>{{ t.returnDate | date:'dd MMM yyyy' }}</td>
+          <td>{{ t.billno }}</td>
+          <td>
+            <button *ngIf="t.paymentScreenshoot" class="btn-view" (click)="openBill(t.paymentScreenshoot)">View Bill</button>
+            <span *ngIf="!t.paymentScreenshoot">-</span>
+          </td>
+          <td><button class="btn-edit" (click)="openEditModal(t, 'given')">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="transactionsGiven.length === 0" class="no-data">No given transactions found</p>
+  </div>
+
+  <!-- TAKEN TRANSACTIONS -->
+  <div class="tran-box">
+    <h3>Taken from Customer</h3>
+    <table *ngIf="transactionsTaken.length > 0" class="tran-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Amount</th>
+          <th>Mode</th>
+          <th>Description</th>
+          
+          <th>Date</th>
+          <th>Bill No</th>
+          <th>Bill</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of transactionsTaken; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>₹ {{ t.Rs }}</td>
+          <td>{{ t.paymentMode }}</td>
+          <td>{{ t.description || '-' }}</td>
+          <td>{{ t.returnDate | date:'dd MMM yyyy' }}</td>
+          <td>{{ t.billno }}</td>
+          <td>
+            <button *ngIf="t.paymentScreenshoot" class="btn-view" (click)="openBill(t.paymentScreenshoot)">View Bill</button>
+            <span *ngIf="!t.paymentScreenshoot">-</span>
+          </td>
+          <td><button class="btn-edit" (click)="openEditModal(t, 'taken')">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="transactionsTaken.length === 0" class="no-data">No taken transactions found</p>
+  </div>
+</div>
+
+<!-- ================= ADD TRANSACTION MODAL ================= -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-box">
+    <h3>{{ tranType === 'given' ? 'Given To Customer' : 'Taken From Customer' }}</h3>
+
+    <div class="form-group">
+      <label>Amount (Rs)</label>
+      <input type="number" [(ngModel)]="form.Rs">
+    </div>
+
+    <div class="form-group">
+      <label>Payment Mode</label>
+      <select [(ngModel)]="form.paymentMode">
+        <option value="cash">Cash</option>
+        <option value="online">Online</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" [(ngModel)]="form.description">
+    </div>
+
+    <div class="form-group">
+      <label>Return Date</label>
+      <input type="date" [(ngModel)]="form.returnDate">
+    </div>
+
+    <div class="form-group">
+      <label>Bill No</label>
+      <input type="number" [(ngModel)]="form.billno">
+    </div>
+
+    <div class="form-group">
+      <label>Payment Screenshot</label>
+      <input type="file" (change)="onFileSelect($event)">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-save" (click)="submitTransaction()">Save</button>
+      <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= EDIT TRANSACTION MODAL ================= -->
+<div class="modal-overlay" *ngIf="showEditModal">
+  <div class="modal-box">
+    <h3>Edit Transaction</h3>
+
+    <div class="form-group">
+      <label>Amount (Rs)</label>
+      <input type="number" [(ngModel)]="editForm.Rs">
+    </div>
+
+    <div class="form-group">
+      <label>Payment Mode</label>
+      <select [(ngModel)]="editForm.paymentMode">
+        <option value="cash">Cash</option>
+        <option value="online">Online</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" [(ngModel)]="editForm.description">
+    </div>
+
+    <div class="form-group">
+      <label>Return Date</label>
+      <input type="date" [(ngModel)]="editForm.returnDate">
+    </div>
+
+    <div class="form-group">
+      <label>Bill No</label>
+      <input type="number" [(ngModel)]="editForm.billno">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-save" (click)="updateTransaction()">Update</button>
+      <button class="btn-cancel" (click)="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= BILL VIEW MODAL ================= -->
+<div class="modal-overlay" *ngIf="showBillModal">
+  <div class="modal-box bill-modal">
+    <h3>Payment Screenshot</h3>
+    <img [src]="billUrl" alt="Bill Screenshot">
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeBillModal()">Close</button>
+    </div>
+  </div>
+</div>

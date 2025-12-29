@@ -1,0 +1,139 @@
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* Page Background */
+.login-page {
+  background-color: #fff9e6;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Wrapper for Form + Video */
+.login-wrapper {
+  display: flex;
+  background-color: #fef3c7;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Form Section */
+.login-left {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-left h2 {
+  font-size: 24px;
+  color: rgba(58, 66, 15, 1);
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.heading {
+  color: rgba(113, 104, 73, 1);
+  font-size: 20px;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bfbfbf;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #645304;
+  outline: none;
+}
+
+.error {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+button {
+  width: 100%;
+  background-color:rgb(35, 41, 2);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: #3c3c07;
+}
+
+button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+/* Right Video Section */
+.login-right {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-right img {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 30px;
+  object-fit: cover;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+  }
+
+  .login-right {
+    height: 200px;
+  }
+
+  .login-left {
+    padding: 30px 25px;
+  }
+
+  .login-left h2 {
+    text-align: center;
+    font-size: 18px;
+  }
+}

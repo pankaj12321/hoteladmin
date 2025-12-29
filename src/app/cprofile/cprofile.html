@@ -1,0 +1,133 @@
+<div *ngIf="customer" class="profile-card">
+
+  <!-- ===== PROFILE HEADER ===== -->
+  <div class="profile-header">
+    <h2>{{ customer.name }}</h2>
+    <p><strong>📱 Mobile:</strong> {{ customer.mobile }}</p>
+  </div>
+
+  <!-- ===== SUMMARY ===== -->
+  <div class="summary-flex">
+    <div class="summary-item given">
+      <p>Total Given</p>
+      <h2>₹{{ totalGiven }}</h2>
+    </div>
+    <div class="summary-item taken">
+      <p>Total Taken</p>
+      <h2>₹{{ totalTaken }}</h2>
+    </div>
+    <div class="summary-item final">
+      <p>Final Balance</p>
+      <h2>₹{{ finalBalance }}</h2>
+    </div>
+  </div>
+
+  <!-- ===== Branch Filter ===== -->
+  <div class="branch-btns">
+    <button (click)="selectBranch('ALL')">All</button>
+    <button (click)="selectBranch('Gokulpura')">Gokulpura</button>
+    <button (click)="selectBranch('Sikar')">Sikar</button>
+    <button (click)="selectBranch('Sanwali')">Sanwali</button>
+  </div>
+
+  <!-- ===== ACTION BUTTONS ===== -->
+  <div class="btn-row">
+    <button class="btn-give" (click)="openPopup('give')">You Gave</button>
+    <button class="btn-got" (click)="openPopup('get')">You Got</button>
+  </div>
+
+  <!-- ===== TRANSACTIONS ===== -->
+  <h3 class="txn-title">Transaction History</h3>
+
+  <div class="txn-item" *ngFor="let t of finalTransactionList">
+
+    <div class="txn-top">
+      <div class="txn-left">
+
+        <!-- TYPE -->
+        <strong [class.green]="t.type === 'give'" [class.red]="t.type === 'get'">
+          {{ t.type === 'give' ? 'You Gave' : 'You Got' }}
+        </strong>
+
+        <!-- DATE -->
+        <div class="txn-row">
+          <b>Date:</b> {{ t.returnDate | date:'dd MMM yyyy' }}
+        </div>
+
+        <!-- BRANCH -->
+        <div class="txn-row">
+          <b>Branch:</b> {{ t.hotelBranchName }}
+        </div>
+
+        <!-- PAYMENT MODE -->
+      
+
+        <!-- DESCRIPTION -->
+        <div class="txn-row">
+          <b>Description:</b> {{ t.description || '-' }}
+        </div>
+
+        <!-- BILL NO -->
+        <div class="txn-row">
+          <b>Bill No:</b> {{ t.billno || '-' }}
+        </div>
+
+        <!-- UPDATED AT -->
+        <div class="txn-row small">
+          <b>Updated:</b> {{ t.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
+        </div>
+
+      </div>
+
+      <!-- AMOUNT -->
+      <div class="amount">
+        ₹{{ t.Rs }} <span style="font-size: 12px; color: rgb(11, 138, 0);">{{ t.paymentMode | uppercase }}</span>
+      </div>
+    </div>
+
+    <!-- SCREENSHOT -->
+    <div *ngIf="t.paymentScreenshot" class="img-row">
+      <img [src]="t.paymentScreenshot" class="txn-thumb" (click)="openImage(t.paymentScreenshot)" />
+      <p class="view-text">Tap to View</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= POPUP FORM ================= -->
+<div class="popup" *ngIf="showPopup">
+  <div class="popup-box">
+    <h3>{{ type === 'give' ? 'You Gave Money' : 'You Got Money' }}</h3>
+
+    <div class="popup-inputs">
+
+      <input type="number" [(ngModel)]="amount" placeholder="Enter Amount" />
+
+      <input type="text" [(ngModel)]="description" placeholder="Enter Description" />
+
+      <input type="text" [(ngModel)]="billno" placeholder="Enter Bill No (optional)" />
+
+      <input type="date" [(ngModel)]="date" />
+
+      <select [(ngModel)]="selectedBranch">
+        <option value="" disabled>Select Branch</option>
+        <option *ngFor="let branch of branches" [value]="branch">
+          {{ branch }}
+        </option>
+      </select>
+
+      <select [(ngModel)]="paymentMode">
+        <option value="cash">Cash</option>
+        <option value="online">Online</option>
+      </select>
+
+      <input type="file" accept="image/*" (change)="onImageSelect($event)" />
+
+    </div>
+
+    <div class="actions">
+      <button class="cancel" (click)="closePopup()">Cancel</button>
+      <button class="submit" (click)="submitTransaction()">Save</button>
+    </div>
+  </div>
+</div>

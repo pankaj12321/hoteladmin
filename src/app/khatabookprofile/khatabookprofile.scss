@@ -1,0 +1,164 @@
+.button-group {
+  display: flex;
+  justify-content: center; /* center the buttons */
+  gap: 20px; /* gap between buttons */
+  margin: 20px 0;
+}
+
+.green-btn,
+.red-btn {
+    width: 40%;
+  padding: 12px 30px; /* thodi badi width */
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.green-btn {
+  background: #28a745;
+  color: #fff;
+}
+
+.red-btn {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* Hover effect */
+.green-btn:hover {
+  transform: scale(1.05);
+}
+
+.red-btn:hover {
+  transform: scale(1.05);
+}
+
+
+/* Modal overlay */
+.form-overlay {
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Form box */
+.transaction-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.transaction-form h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.transaction-form input,
+.transaction-form textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.save {
+  background: #0a7cff;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel {
+  background: #6c757d;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.transaction-history-container {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin: 20px;
+  flex-wrap: wrap; /* mobile responsive */
+}
+
+.transaction-column {
+  flex: 1; /* each column takes equal width */
+  min-width: 300px; /* prevent too small on mobile */
+}
+
+.transaction-column h3 {
+  color: #0a7cff;
+  border-bottom: 2px solid #0a7cff;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.transaction-card {
+  background: #f4f6f8;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.transaction-card.red {
+  background: #ffe6e6;
+  border-left: 5px solid #dc3545;
+}
+
+.transaction-card p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.summary-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 20px;
+  flex-wrap: wrap;
+}
+
+.summary-box {
+  flex: 1;
+  min-width: 120px;
+  padding: 15px;
+  border-radius: 10px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.summary-box.green { background: #28a745; }
+.summary-box.red { background: #dc3545; }
+.summary-box.blue { background: #0a7cff; }
+
+.summary-box h4 {
+  margin: 0 0 5px;
+  font-size: 16px;  
+}
+
+.summary-box p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}

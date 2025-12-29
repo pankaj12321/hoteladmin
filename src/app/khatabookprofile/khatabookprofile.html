@@ -1,0 +1,74 @@
+<div class="header">
+  <h2>📒 Khatabook Profile</h2>
+</div>
+<div class="summary-container">
+  <div class="summary-box green">
+    <h4>Total Taken</h4>
+    <p>Rs {{ totalTaken }}</p>
+  </div>
+  <div class="summary-box red">
+    <h4>Total Given</h4>
+    <p>Rs {{ totalGiven }}</p>
+  </div>
+  <div class="summary-box blue">
+    <h4>Balance</h4>
+    <p>Rs {{ balance }}</p>
+  </div>
+</div>
+
+
+<!-- BUTTONS -->
+<div class="button-group">
+  <button class="green-btn" (click)="openForm('taken')">Taken From Admin</button>
+  <button class="red-btn" (click)="openForm('given')">Given To Admin</button>
+</div>
+
+<!-- TRANSACTION FORM -->
+<div class="form-overlay" *ngIf="showForm">
+  <div class="transaction-form">
+    <h3>{{ formType === 'taken' ? 'Taken From Admin' : 'Given To Admin' }}</h3>
+
+    <input type="number" placeholder="Amount (Rs)" [(ngModel)]="transaction[formType].amount">
+    <input type="text" placeholder="Payment Mode" [(ngModel)]="transaction[formType].paymentMode">
+    <input type="text" placeholder="Bill No" [(ngModel)]="transaction[formType].billno">
+    <input type="date" placeholder="Return Date" [(ngModel)]="transaction[formType].returnDate">
+    <textarea placeholder="Description" [(ngModel)]="transaction[formType].description"></textarea>
+
+    <input type="file" (change)="onFileSelected($event)">
+
+    <div class="form-actions">
+      <button class="save" (click)="makeTransaction()">Submit</button>
+      <button class="cancel" (click)="closeForm()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="transaction-history-container">
+
+  <div class="transaction-column">
+    <h3>🟢 Taken From Admin</h3>
+    <div *ngIf="takenFromAdmin.length === 0">No transactions found</div>
+    <div class="transaction-card" *ngFor="let t of takenFromAdmin">
+      <p><b>Amount:</b> Rs {{ t.Rs }}</p>
+      <p><b>Payment Mode:</b> {{ t.paymentMode }}</p>
+      <p><b>Bill No:</b> {{ t.billno }}</p>
+      <p><b>Return Date:</b> {{ t.returnDate | date }}</p>
+      <p><b>Description:</b> {{ t.description }}</p>
+      <p *ngIf="t.paymentScreenshoot"><b>Screenshot:</b> <a [href]="t.paymentScreenshoot" target="_blank">View</a></p>
+    </div>
+  </div>
+
+  <div class="transaction-column">
+    <h3>🔴 Given To Admin</h3>
+    <div *ngIf="givenToAdmin.length === 0">No transactions found</div>
+    <div class="transaction-card red" *ngFor="let t of givenToAdmin">
+      <p><b>Amount:</b> Rs {{ t.Rs }}</p>
+      <p><b>Payment Mode:</b> {{ t.paymentMode }}</p>
+      <p><b>Bill No:</b> {{ t.billno }}</p>
+      <p><b>Return Date:</b> {{ t.returnDate | date }}</p>
+      <p><b>Description:</b> {{ t.description }}</p>
+      <p *ngIf="t.paymentScreenshoot"><b>Screenshot:</b> <a [href]="t.paymentScreenshoot" target="_blank">View</a></p>
+    </div>
+  </div>
+
+</div>
+

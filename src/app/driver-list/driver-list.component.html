@@ -1,0 +1,97 @@
+<div class="driver-container">
+  <!-- Left Side: Driver List -->
+  <div class="driver-list">
+    <h2>Driver List</h2>
+    <ul>
+      <li *ngFor="let driver of filteredDrivers" style="cursor:pointer;" (click)="viewDriverProfile(driver._id)">
+
+        <div class="sr-number">{{ driver.srNumber }}</div>
+        <div class="driver-name">{{ driver.name }}</div>
+        <div class="driver-details">
+          <div>Car: {{ driver.carNumber }}</div>
+          <div>Mobile: {{ driver.mobile }}</div>  
+            <div *ngIf="driver.location">Location: {{ driver.location }}</div>
+        </div>
+
+        <!-- Edit button -->
+        <button (click)="openEditModal(driver); $event.stopPropagation()" class="btn-edit">
+          Edit
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Right Side: Search and Add -->
+  <div class="driver-actions">
+    <h2>Search Driver</h2>
+    <input type="text" placeholder="Search by name, car no, mobile, sr no" [(ngModel)]="searchTerm"
+      (input)="applySearch()" />
+
+    <button (click)="openModal()" class="btn-secondary">+ Add Driver</button>
+  </div>
+</div>
+
+<!-- Modal for Add -->
+<div class="modal" *ngIf="showModal">
+  <div class="modal-content">
+    <h3>Add Driver</h3>
+    <form (ngSubmit)="addDriver()">
+      <label>Name:</label>
+      <input type="text" [(ngModel)]="newDriver.name" name="name" required />
+
+      <label>Car Number:</label>
+      <input type="text" [(ngModel)]="newDriver.carNumber" name="carNumber" required
+        (input)="newDriver.carNumber = newDriver.carNumber.toUpperCase()" />
+
+      <label>Mobile:</label>
+      <input type="text" [(ngModel)]="newDriver.mobile" name="mobile" required maxlength="10" minlength="10"
+        pattern="[0-9]{10}" />
+
+  <label>Location:</label>
+<input type="text" [(ngModel)]="newDriver.location" name="location" required />
+
+
+
+      <label>SR Number:</label>
+      <input type="text" [(ngModel)]="newDriver.srNumber" name="srNumber" readonly />
+
+      <button type="submit">Save</button>
+      <button type="button" (click)="closeModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal for Edit -->
+<div class="modal" *ngIf="editModal">
+  <div class="modal-content">
+    <h3>Edit Driver</h3>
+    <form (ngSubmit)="updateDriver()">
+      <label>Name:</label>
+      <input type="text" [(ngModel)]="editDriver.name" name="editName" required />
+
+      <label>Car Number:</label>
+      <input type="text" [(ngModel)]="editDriver.carNumber" name="editCarNumber" required
+        (input)="editDriver.carNumber = editDriver.carNumber.toUpperCase()" />
+
+      <label>Mobile:</label>
+      <input type="text" [(ngModel)]="editDriver.mobile" name="editMobile" required maxlength="10" minlength="10"
+        pattern="[0-9]{10}" />
+        <label>Location:</label>
+<input type="text" [(ngModel)]="editDriver.location" name="editLocation" required />
+
+
+      <label>SR Number:</label>
+      <input type="text" [(ngModel)]="editDriver.srNumber" name="editSrNumber" readonly />
+
+      <button type="submit">Update</button>
+      <button type="button" (click)="closeEditModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+<!-- SUCCESS POPUP -->
+<div class="success-overlay" *ngIf="successPopup">
+  <div class="success-box">
+    <h3>{{ successMessage }}</h3>
+  </div>
+</div>

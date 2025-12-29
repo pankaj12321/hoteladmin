@@ -1,0 +1,142 @@
+<div class="profile-page" *ngIf="!loading && staffData">
+
+  <div class="profile-card">
+
+    <!-- LEFT IMAGE SECTION -->
+    <div class="profile-left">
+      <img [src]="staffData.profileImage || 'assets/user.png'" alt="Profile Image" />
+
+      <h3>{{ staffData.firstName }} {{ staffData.lastName }}</h3>
+      <p class="role">{{ staffData.role | titlecase }}</p>
+    </div>
+
+    <!-- RIGHT DETAILS SECTION -->
+    <div class="profile-right">
+      <div class="row">
+        <span>Mobile</span>
+        <p>{{ staffData.mobile }}</p>
+      </div>
+
+      <div class="row">
+        <span>Aadhar No</span>
+        <p>{{ staffData.adharNumber }}</p>
+      </div>
+
+      <div class="row">
+        <span>Date of Birth</span>
+        <p>{{ staffData.DOB | date:'dd MMM yyyy' }}</p>
+      </div>
+
+      <div class="row">
+        <span>City</span>
+        <p>{{ staffData.address?.city }}</p>
+      </div>
+
+      <div class="row">
+        <span>Created At</span>
+        <p>{{ staffData.createdAt | date:'dd MMM yyyy, hh:mm a' }}</p>
+      </div>
+      <div class="row">
+        <span>Branch</span>
+        <p>{{ staffData.branchName || 'N/A' }}</p>
+      </div>
+
+      <div class="row">
+        <span>Salary</span>
+        <p>₹ {{ staffData.salary || 0 }}</p>
+      </div>
+
+
+    </div>
+
+    <div class="row">
+      <span>ID Proof</span>
+      <img *ngIf="staffData.IdProofImage" [src]="staffData.IdProofImage" class="id-thumb" alt="ID Proof"
+        (click)="openIdImage()" />
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= ATTENDANCE REGISTER ================= -->
+<div class="attendance-register">
+
+  <!-- Header -->
+  <div class="register-header">
+    <h3>Attendance Register</h3>
+
+    <div class="register-filters">
+      <select (change)="onMonthChange($event)">
+        <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m" [selected]="m === selectedMonth">
+          {{ m }} Month
+        </option>
+      </select>
+
+      <select (change)="onYearChange($event)">
+        <option *ngFor="let y of [2024,2025,2026]" [value]="y" [selected]="y === selectedYear">
+          {{ y }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ================= REGISTER GRID ================= -->
+  <div class="register-grid">
+
+    <div class="day-box" *ngFor="let d of attendanceDays">
+
+      <!-- DATE -->
+      <div class="date">{{ d.day }}</div>
+
+      <!-- DAY -->
+      <div class="day">
+        {{ (selectedYear + '-' + selectedMonth + '-' + d.day) | date:'EEE' }}
+      </div>
+
+      <!-- STATUS -->
+      <div class="status" [ngClass]="{
+          present: d.status === 'Present',
+          absent: d.status === 'Absent',
+          half: d.status === 'HalfDay',
+          leave: d.status === 'PaidLeave'
+        }">
+        {{ d.status || '—' }}
+      </div>
+
+      <!-- TIME -->
+      <div class="time">
+        {{ d.time || '--' }}
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= TOTAL ================= -->
+  <div class="register-summary">
+    <div class="sum present">Present: <b>{{ totalPresent }}</b></div>
+    <div class="sum absent">Absent: <b>{{ totalAbsent }}</b></div>
+    <div class="sum half">Half Day: <b>{{ totalHalfDay }}</b></div>
+    <div class="sum leave">Paid Leave: <b>{{ totalPaidLeave }}</b></div>
+  </div>
+
+</div>
+<!-- ================= SALARY SUMMARY ================= -->
+<div class="salary-summary">
+  <h3>Salary Calculation ({{ selectedMonth }}/{{ selectedYear }})</h3>
+
+  <div class="salary-row">
+    <span>Monthly Salary</span>
+    <b>₹ {{ monthlySalary | number:'1.0-0' }}</b>
+  </div>
+
+  <div class="salary-row">
+    <span>Per Day Salary</span>
+    <b>₹ {{ perDaySalary | number:'1.2-2' }}</b>
+  </div>
+
+  <div class="salary-row total">
+    <span>Payable Salary</span>
+    <b>₹ {{ calculatedSalary | number:'1.0-0' }}</b>
+  </div>
+</div>

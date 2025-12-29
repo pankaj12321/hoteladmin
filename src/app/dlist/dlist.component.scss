@@ -1,0 +1,209 @@
+.driver-profile-container {
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 🔸 Top Section Layout */
+.top-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Left side - Driver Info */
+.driver-info {
+  flex: 1;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.driver-info h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Right side - Payment Form */
+.payment-form {
+  flex: 1;
+  background: #fdf3ea;
+  padding: 15px 20px;
+  border-radius: 10px;
+}
+
+.payment-form h3 {
+  color:  #ff5623;
+  margin-bottom: 15px;
+}
+
+.payment-form .form-control {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Orange Button */
+.btn-orange {
+  background-color: #ff5623;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-orange:hover {
+  background-color: #e46d00;
+}
+
+/* Bottom Table Section */
+.bottom-section {
+  margin-top: 25px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-section h3 {
+  color:  #ff5623;
+  margin-bottom: 15px;
+}
+
+.btn-edit {
+  background: #03072e;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-dialog {
+  background: #fff;
+  border-radius: 12px;
+  width: 400px;
+  padding: 20px;
+}
+
+.modal-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.btn-green {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-green:hover {
+  background-color: #1ebd5a;
+}
+.toast-box {
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  width: 260px;
+  padding: 15px;
+  border-radius: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: 0.35s ease;
+  z-index: 999999;
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Show Animation */
+.toast-box.show {
+  right: 20px;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Success */
+.toast-box.success {
+  background: #2ecc71;
+}
+
+/* Error */
+.toast-box.error {
+  background: #e74c3c;
+}
+
+.toast-icon {
+  font-size: 20px;
+}
+
+.toast-message {
+  font-size: 15px;
+}
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  margin-top: 10px;
+}
+
+.filter-bar select {
+  padding: 8px 12px;
+  min-width: 140px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-bar select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.filter-bar select:hover {
+  border-color: #2563eb;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-bar select {
+    width: 100%;
+  }
+}

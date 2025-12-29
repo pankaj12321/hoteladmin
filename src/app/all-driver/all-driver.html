@@ -1,0 +1,64 @@
+<div class="driver-page">
+  <div class="filter-container">
+    <div class="search-container">
+      <input type="text" placeholder="Search by name, mobile or car number..." [(ngModel)]="searchTerm"
+        (input)="applyFilters()" />
+    </div>
+    <div class="filter">
+      <label>From Date:</label>
+      <input type="date" [(ngModel)]="fromDate" (change)="applyFilters()" />
+    </div>
+
+    <div class="filter">
+      <label>To Date:</label>
+      <input type="date" [(ngModel)]="toDate" (change)="applyFilters()" />
+    </div>
+
+    <div class="filter">
+      <label>Total Entries:</label>
+      <select [(ngModel)]="entryFilter" (change)="applyFilters()">
+        <option value="">All</option>
+        <option *ngFor="let range of entryRanges" [value]="range">
+          {{ range }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="driver-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>SR Number</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <!-- <th>Car Number</th> -->
+          <th>Created Date</th>
+          <th>Location</th>
+          <th>Total Entries</th>
+          <th>Whatsapp</th>
+          <th>Text</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of filteredDrivers; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ d.srNumber }}</td>
+          <td>{{ d.name }}</td>
+          <td>{{ d.mobile }}</td>
+          <!-- <td>{{ d.carNumber }}</td> -->
+          <td>{{ d.createdAt | date: 'dd-MM-yyyy' }}</td>
+          <td>{{ d.location || '—' }}</td>
+          <td>{{ d.totalEntries || 0 }}</td>
+          <td>
+            <button (click)="sendWhatsAppReminder(d)">
+              <i class="fa-brands fa-whatsapp"></i> Send
+            </button>
+          </td>
+          <td><i class="fa-solid fa-envelope-open-text"></i></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="staff-container">
+  <h2>Staff Attendance</h2>
+
+  <div class="actions">
+    <input type="text" placeholder="Search by name or mobile..." [(ngModel)]="searchTerm" (input)="searchStaff()" />
+  </div>
+  <div class="branch-filter">
+    <button (click)="filterByBranch('ALL')">All</button>
+    <button (click)="filterByBranch('Gokulpura')">Gokulpura</button>
+    <button (click)="filterByBranch('Sikar')">Sikar</button>
+    <button (click)="filterByBranch('Sanwali')">Sanwali</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>SR</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Branch</th>
+        <th>City</th>
+        <th>Attendance</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let s of filteredStaff; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ s.firstName }} {{ s.lastName }}</td>
+        <td>{{ s.mobile }}</td>
+        <td>{{ s.branchName }}</td>
+        <td>{{ s.address?.city }}</td>
+        <td>{{ s.attendance }}</td>
+        <td>
+          <button *ngIf="!s.attendanceMarked" class="btn mark-btn" (click)="openAttendanceModal(s)">
+            Mark Attendance
+          </button>
+
+          <button *ngIf="s.attendanceMarked" class="btn edit-btn" (click)="openEditModal(s)">
+            Edit Attendance
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mark Attendance Modal -->
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-content">
+      <h3>Mark Attendance - {{ selectedStaff?.firstName }}</h3>
+
+      <div class="edit-options">
+        <label>
+          <input type="radio" name="attendance" value="P" [(ngModel)]="selectedAttendance" /> Present
+        </label>
+        <label>
+          <input type="radio" name="attendance" value="A" [(ngModel)]="selectedAttendance" /> Absent
+        </label>
+        <label>
+          <input type="radio" name="attendance" value="H" [(ngModel)]="selectedAttendance" /> Half Day
+        </label>
+        <label>
+          <input type="radio" name="attendance" value="PL" [(ngModel)]="selectedAttendance" /> Paid Leave
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn mark-btn" (click)="markSelectedAttendance()">Submit</button>
+        <button class="btn cancel-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Attendance Modal -->
+  <div class="modal" *ngIf="showEditModal">
+    <div class="modal-content">
+      <h3>Edit Attendance - {{ selectedStaff?.firstName }}</h3>
+
+      <div class="edit-options">
+        <label>
+          <input type="radio" name="editAttendance" value="Present" [(ngModel)]="selectedEditAttendance" /> Present
+        </label>
+        <label>
+          <input type="radio" name="editAttendance" value="Absent" [(ngModel)]="selectedEditAttendance" /> Absent
+        </label>
+        <label>
+          <input type="radio" name="editAttendance" value="Half Day" [(ngModel)]="selectedEditAttendance" /> Half Day
+        </label>
+        <label>
+          <input type="radio" name="editAttendance" value="Paid Leave" [(ngModel)]="selectedEditAttendance" /> Paid
+          Leave
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn edit-btn" (click)="updateAttendance()">Update</button>
+        <button class="btn cancel-btn" (click)="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

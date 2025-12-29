@@ -1,0 +1,121 @@
+<div class="profile-box" *ngIf="supplierData">
+
+  <h2>{{ supplierData.supplierName }}</h2>
+  <p><strong>Company:</strong> {{ supplierData.supplierCompany }}</p>
+  <p><strong>Phone:</strong> {{ supplierData.supplierPhone }}</p>
+
+  <div class="summary-box">
+
+    <div class="sum-card taken-box">
+      <p>Total Taken</p>
+      <h3>₹ {{ totalTaken }}</h3>
+    </div>
+
+    <div class="sum-card given-box">
+      <p>Total Given</p>
+      <h3>₹ {{ totalGiven }}</h3>
+    </div>
+
+    <div class="sum-card balance-box">
+      <p>Balance</p>
+      <h3>₹ {{ totalTaken - totalGiven }}</h3>
+    </div>
+
+  </div>
+
+  <!-- Branch Buttons -->
+  <div class="branch-filter">
+    <button [class.active]="selectedBranch === 'ALL'" (click)="selectBranch('ALL')">All</button>
+    <button [class.active]="selectedBranch === 'Gokulpoora Sikar'"
+      (click)="selectBranch('Gokulpoora Sikar')">Gokulpoora</button>
+    <button [class.active]="selectedBranch === 'Sawali'" (click)="selectBranch('Sawali')">Sawali</button>
+    <button [class.active]="selectedBranch === 'Jaipur'" (click)="selectBranch('Jaipur')">Sikar</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn take" (click)="openForm('taken')">Take From {{ supplierData.supplierName }}</button>
+    <button class="btn give" (click)="openForm('given')">Give To {{ supplierData.supplierName }}</button>
+  </div>
+</div>
+
+<div class="form-overlay" *ngIf="showForm">
+  <div class="form-box">
+    <h3 *ngIf="formType === 'taken'">Take From {{ supplierData.supplierName }}</h3>
+    <h3 *ngIf="formType === 'given'">Give To {{ supplierData.supplierName }}</h3>
+    <input type="number" placeholder="Amount" [(ngModel)]="transaction.amount">
+    <input type="text" placeholder="Description" [(ngModel)]="transaction.discription">
+    <input type="number" placeholder="Bill No" [(ngModel)]="transaction.billno">
+    <select [(ngModel)]="transaction.hotelBranchName">
+      <option value="">Select Branch</option>
+      <option value="Gokulpoora Sikar">Gokulpoora</option>
+      <option value="Sawali">Sawali</option>
+      <option value="Jaipur">Sikar</option>
+    </select>
+    <input type="date" placeholder="Return Date" [(ngModel)]="transaction.returnDate">
+    <input type="date" placeholder="Entry date" [(ngModel)]="transaction.updatedAt">
+
+
+    <select [(ngModel)]="transaction.paymentMode">
+      <option value="">Select Payment Mode</option>
+      <option value="cash">Cash</option>
+      <option value="online">Online</option>
+    </select>
+
+    <input type="file" (change)="onFileSelect($event)">
+    <div class="btn-row">
+      <button class="btn save" (click)="submitTransaction()">Save</button>
+      <button class="btn cancel" (click)="showForm = false">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSACTION LIST -->
+<div class="transaction-row">
+  <div class="left-col">
+    <h4>Taken From {{ supplierData.supplierName }}</h4>
+    <div class="tran-card taken-card" *ngFor="let t of takenList">
+      <div class="left-info">
+        <p class="amount">₹ {{ t.Rs }} <span class="mode">{{ t.paymentMode }}</span></p>
+        <p class="date">
+         Entry:
+          {{ t.entryDate | date:'medium' }}
+        </p>
+        <p *ngIf="t.billno">Bill No: {{ t.billno }}</p>
+        <p>Description: {{ t.discription || '-' }}</p>
+        <p>Branch: {{ t.hotelBranchName }}</p>
+        <p class="return" *ngIf="t.returnDate">
+         Return Date:
+          {{ t.returnDate | date:'dd MMM yyyy' }}
+        </p>
+      </div>
+      <div class="right-col">
+        <img *ngIf="t.image" [src]="t.image" class="thumb" (click)="openImage(t.image)">
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <h4>Given To {{ supplierData.supplierName }}</h4>
+    <div class="tran-card taken-card" *ngFor="let t of givenList">
+      <div class="left-info">
+        <p class="amount">₹ {{ t.Rs }} <span class="mode">{{ t.paymentMode }}</span></p>
+        <p class="date">
+          Entry:
+          {{ t.entryDate | date:'dd MMM yyyy, hh:mm a' }}
+        </p>
+
+        <p>Description:{{ t.discription || '-' }}</p>
+        <p *ngIf="t.billno">Bill No: {{ t.billno }}</p>
+        <p>Branch:{{ t.hotelBranchName }}</p>
+        <p class="return">Return Date: {{ t.returnDate | date:'dd MMM yyyy' }}</p>
+
+      </div>
+      <div class="right-col">
+        <img *ngIf="t.image" [src]="t.image" class="thumb" (click)="openImage(t.image)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="img-popup" *ngIf="previewImage" (click)="previewImage = ''">
+  <img [src]="previewImage">
+</div>

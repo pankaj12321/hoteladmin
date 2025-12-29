@@ -1,0 +1,65 @@
+<div class="attendance-container">
+  <h2>Staff Attendance</h2>
+
+  <div class="filter-section">
+    <label>Month:</label>
+    <select [(ngModel)]="selectedMonth" (change)="onMonthChange($event)">
+      <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m">
+        {{ m }}
+      </option>
+    </select>
+
+    <label>Year:</label>
+    <select [(ngModel)]="selectedYear" (change)="onYearChange($event)">
+      <option *ngFor="let y of [2023,2024,2025,2026]" [value]="y">{{ y }}</option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="attendance-table">
+      <thead>
+        <tr>
+          <th>SR</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th *ngFor="let day of daysInMonth">{{ day }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let staff of staffList; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ staff.staffName }}</td>
+          <td>{{ staff.mobile }}</td>
+          <td *ngFor="let day of daysInMonth" [ngClass]="{
+      'present': staff.attendance[day]?.attendance === 'Present',
+      'absent': staff.attendance[day]?.attendance === 'Absent',
+      'half': staff.attendance[day]?.attendance === 'Half Day'
+    }">
+
+            <div class="att-box">
+              <span class="att-status">
+                {{
+                staff.attendance[day]?.attendance === 'Present' ? 'P' :
+                staff.attendance[day]?.attendance === 'Absent' ? 'A' :
+                staff.attendance[day]?.attendance === 'Half Day' ? 'H' :
+                staff.attendance[day]?.attendance === 'Paid Leave' ? 'PL' :
+                '—'
+                }}
+              </span>
+
+              <small class="att-time" *ngIf="staff.attendance[day]?.time && staff.attendance[day]?.time !== '—'">
+                {{ staff.attendance[day]?.time | slice:0:8 }} {{ staff.attendance[day]?.time | slice:-2 }}
+              </small>
+            </div>
+
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-actions">
+    <button (click)="nextMonth()">Next</button>
+  </div>
+</div>

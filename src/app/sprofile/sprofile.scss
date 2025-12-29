@@ -1,0 +1,319 @@
+.profile-box {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(75, 1, 1, 0.08);
+  margin-bottom: 20px;
+}
+
+.summary-box {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+
+  div {
+    text-align: center;
+  }
+
+  h3 {
+    margin-top: 5px;
+  }
+}
+
+.btn-row {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+
+  .btn {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .take { background: #f0b802; color: #fff; }
+  .give { background: #3a0000; color: #fff; }
+}
+
+.overlay {
+  position: fixed;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-box {
+  background: #fff;
+  padding: 20px;
+  width: 300px;
+  border-radius: 12px;
+
+  input, select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .submit { background: #2ecc71; color: #fff; }
+    .cancel { background: #e74c3c; color: #fff; }
+  }
+}
+
+.transaction-list {
+  margin-top: 20px;
+
+  .tran-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+}
+/* Summary Cards Row */
+.summary-box {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 20px 0;
+}
+
+/* Cards */
+.sum-card {
+  flex: 1;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.sum-card p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sum-card h3 {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Individual Colors */
+.taken-box {
+  border-left: 5px solid #ff4d4d;     /* Red */
+  background: #ffe8e8;
+  color: #c40000;
+}
+
+.given-box {
+  border-left: 5px solid #1e90ff;     /* Blue */
+  background: #e7f1ff;
+  color: #005bbb;
+}
+
+.balance-box {
+  border-left: 5px solid #28a745;     /* Green */
+  background: #e7ffe9;
+  color: #0a7a1c;
+}
+.transaction-row {
+  padding:20px;
+  display: flex;
+  justify-content: space-between;
+  gap:5px;
+  margin-top: 20px;
+}
+
+/* Each Column */
+.left-col,
+.right-col {
+  width: 50%;
+}
+
+/* Headings */
+.left-col h4,
+.right-col h4 {
+  text-align: center;
+  color: #444;
+  margin-bottom: 10px;
+  font-size: 18px;    
+  font-weight: 600;
+}
+
+/* Cards */
+/* Main transaction card */
+.tran-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Left info section */
+.left-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+line-height: 10px;
+}
+
+/* Thumbnail image */
+.right-img .thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+/* Amount highlight */
+.amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Payment mode small text */
+.mode {
+  font-size: 16px;
+  color: #01770b;
+}
+
+/* Date small text */
+.date {
+  font-size: 12px;
+  color: #777;
+}
+
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.form-box {
+  gap: 5px;
+  background: #fff;
+  width: 40%;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+}
+
+.form-box input,
+.form-box select {
+  width: 50%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin: 10px 0;
+}
+
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.btn.save {
+  background: #0a7cff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+
+.btn.cancel {
+  background: #d9534f;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+.thumb {
+  width: 55px;
+  height: 55px;
+  border-radius: 6px;
+  margin-top: 8px;
+  cursor: pointer;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.img-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.img-popup img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+.branch-filter {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.branch-filter button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #f2f2f2;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.branch-filter button.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.return{
+  color: rgb(197, 1, 1);
+}
+
+.tran-card { margin-bottom: 12px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+.tran-card .thumb { width: 50px; height: 50px; object-fit: cover; cursor: pointer; }
+.transaction-row { display: flex; gap: 12px; }
+.left-col, .right-col { flex: 1; overflow-x: auto; }

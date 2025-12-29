@@ -1,0 +1,234 @@
+<div class="tab-row">
+  <span (click)="openDiv('customer')" [class.active]="activeDiv === 'customer'">Customer</span>
+  <span (click)="openDiv('supplier')" [class.active]="activeDiv === 'supplier'">Supplier</span>
+  <span (click)="openDiv('expense')" [class.active]="activeDiv === 'expense'">Hotel Expense</span>
+</div>
+<hr />
+<!-- ================= CUSTOMER SECTION ================= -->
+<div *ngIf="activeDiv === 'customer'" class="content-box">
+  <div class="top-row">
+    <input type="text" placeholder="Search customer... Via Mobile Number & Name" class="search-input"
+      [(ngModel)]="searchText" (input)="filterCustomers()" />
+    <button class="add-btn" (click)="openModal()">+ Add Customer</button>
+  </div>
+  <div class="customer-grid">
+    <div class="cust-card" *ngFor="let c of filteredCustomers" (click)="navigateToProfile(c)">
+      <div class="left-border"></div>
+      <h3>{{ c.name }}</h3>
+      <p>📱 {{ c.mobile }}</p>
+    </div>
+  </div>
+</div>
+<!-- ============================
+     SUPPLIER SECTION UI
+============================= -->
+<div *ngIf="activeDiv === 'supplier'" class="content-box">
+  <!-- SEARCH + ADD BUTTON -->
+  <div class="supplier-top-bar">
+    <input type="text" placeholder="Search Supplier..." [(ngModel)]="supplierSearchText" (input)="filterSuppliers()"
+      class="supplier-search" />
+
+    <button class="add-supplier-btn" (click)="openSupplierForm()">+ Add Supplier</button>
+  </div>
+
+  <!-- SUPPLIER LIST -->
+  <div class="supplier-list">
+    <div *ngFor="let s of filteredSuppliers" class="supplier-card" (click)="openSupplierProfile(s.supplierId)">
+
+      <img src="../../assets/images.png" class="profile-pic">
+
+      <div>
+        <p><strong>Name:</strong> {{ s.supplierName }}</p>
+        <p><strong>Company:</strong> {{ s.supplierCompany }}</p>
+        <p><strong>Phone:</strong> {{ s.supplierPhone }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div *ngIf="showSupplierForm" class="supplier-overlay">
+    <div class="supplier-box">
+      <h3 style="text-align:center;">Add Supplier</h3>
+
+      <input type="text" placeholder="Supplier Name" [(ngModel)]="supplierForm.supplierName">
+      <input type="text" placeholder="Supplier Company" [(ngModel)]="supplierForm.supplierCompany">
+      <input type="text" placeholder="Phone Number" [(ngModel)]="supplierForm.supplierPhone">
+
+      <div class="form-btns">
+        <button class="cancel-btn" (click)="closeSupplierForm()">Cancel</button>
+        <button class="save-btn" (click)="submitSupplier()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ================= EXPENSE SECTION ================= -->
+<!-- Add Expensis -->
+<div *ngIf="activeDiv === 'expense'" class="content-box">
+  <h3 class="expense-heading">Hotel Expense & Earning</h3>
+  <div *ngIf="showAddExpenseForm" class="form-box">
+    <h3>Add Expense</h3>
+    <input type="number" placeholder="Amount" [(ngModel)]="expenseForm.amount">
+    <input type="text" placeholder="Items (comma separated)" [(ngModel)]="expenseForm.items">
+    <input type="date" [(ngModel)]="expenseForm.date">
+    <input type="number" placeholder="Bill Number" [(ngModel)]="expenseForm.billno"> <!-- BILL NO -->
+
+    <input type="text" placeholder="Description" [(ngModel)]="expenseForm.description">
+    <select [(ngModel)]="expenseForm.branch">
+      <option *ngFor="let b of branches" [value]="b">{{ b }}</option>
+    </select>
+
+
+    <select [(ngModel)]="expenseForm.mode">
+      <option value="cash">Cash</option>
+      <option value="online">Online</option>
+    </select>
+    <input type="file" (change)="onExpenseImageSelect($event)" accept="image/*">
+    <button (click)="addExpense()">Submit</button>
+    <button class="cancel" (click)="showAddExpenseForm=false">Cancel</button>
+  </div>
+
+
+  <!-- Add Earning -->
+  <div *ngIf="showAddEarningForm" class="form-box">
+    <h3>Add Earning</h3>
+    <input type="number" placeholder="Amount" [(ngModel)]="earningForm.amount">
+    <input type="text" placeholder="Details (comma separated)" [(ngModel)]="earningForm.details">
+    <input type="date" [(ngModel)]="earningForm.date">
+    <input type="number" placeholder="Bill Number" [(ngModel)]="earningForm.billno">
+    <select [(ngModel)]="earningForm.branch">
+      <option *ngFor="let b of branches" [value]="b">{{ b }}</option>
+    </select>
+    <!-- BILL NO -->
+
+    <input type="text" placeholder="Description" [(ngModel)]="earningForm.description">
+    <select [(ngModel)]="earningForm.mode">
+      <option value="cash">Cash</option>
+      <option value="online">Online</option>
+    </select>
+    <input type="file" (change)="onEarningImageSelect($event)" accept="image/*">
+    <button (click)="addEarning()">Submit</button>
+    <button class="cancel" (click)="showAddEarningForm=false">Cancel</button>
+  </div>
+  <div class="branch-row">
+    <div class="branch-card" *ngFor="let b of branches" [class.active]="selectedBranch === b" (click)="changeBranch(b)">
+      {{ b }}
+    </div>
+  </div>
+
+  <!-- Top Final Price -->
+  <div class="summary">
+
+    <!-- Total Earnings -->
+    <div class="summary-one">
+      <p class="summary-title">Total Earnings</p>
+      <p class="summary-subtitle">
+        ₹{{ totalMonthlyEarnings || 0 }}
+      </p>
+    </div>
+
+    <!-- Total Expenses -->
+    <div class="summary-two">
+      <p class="summary-title-two">Total Expenses</p>
+      <p class="summary-subtitle-two">
+        ₹{{ totalMonthlyExpenses || 0 }}
+      </p>
+    </div>
+
+    <!-- 🔥 Final Balance -->
+    <div class="summary-three">
+      <p class="summary-title">Final Balance</p>
+      <p class="summary-subtitle">
+        ₹{{ (totalMonthlyEarnings || 0) - (totalMonthlyExpenses || 0) }}
+      </p>
+    </div>
+
+  </div>
+
+
+
+  <!-- Add Button -->
+  <div class="btn-row">
+    <button class="btn-2" (click)="showAddEarningForm = true" style="background: rgb(5, 192, 5);">+ Add Earning</button>
+    <button class="btn-1" (click)="showAddExpenseForm = true" style="background: rgb(255, 0, 0);">+ Add Expense</button>
+  </div>
+
+  <!-- Earning amount -->
+  <div class="two-lists">
+    <div class="list-box">
+      <h3 style="font-size: 22px; font-weight: 600; color: rgb(78, 77, 77);">Earning List</h3>
+      <div *ngFor="let e of hotelEarnings">
+        <div class="card">
+          <div class="title-box">
+            <p><strong>Amount:</strong> ₹{{ e.earningAmount }}</p>
+            <p><strong>Date:</strong> {{ e.earningDate | date }}</p>
+            <p><strong>Mode:</strong> {{ e.paymentMode }}</p>
+            <p><strong>Bill No:</strong> {{ e.billno || '-' }}</p>
+            <p><strong>Description:</strong> {{ e.discription || '-' }}</p>
+            <p><strong>Time:</strong> {{ e.time || (e.dateTime | date:'shortTime') }}</p>
+            <p><strong>Branch:</strong> {{ e.hotelBranchName }}</p>
+
+          </div>
+          <div class="img-box">
+            <img *ngIf="e.paymentScreenshoot" [src]="e.paymentScreenshoot" class="thumb-img"
+              (click)="openImage(e.paymentScreenshoot)">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- EXPENSE LIST -->
+    <div class="list-box">
+      <h3 style="font-size: 22px; font-weight: 600; color: rgb(78, 77, 77);">Expense List</h3>
+      <div *ngFor="let e of hotelExpenses">
+        <div class="card">
+          <div class="title-box">
+            <p><strong>Amount:</strong> ₹{{ e.expenseAmount }}</p>
+            <p><strong>Date:</strong> {{ e.expenseDate | date }}</p>
+            <p><strong>Mode:</strong> {{ e.paymentMode }}</p>
+            <p><strong>Bill No:</strong> {{ e.billno || '-' }}</p>
+            <p><strong>Description:</strong> {{ e.discription || '-' }}</p>
+            <p><strong>Time:</strong> {{ e.dateTime | date:'shortTime' }}</p>
+            <p><strong>Branch:</strong> {{ e.hotelBranchName }}</p>
+
+
+          </div>
+          <div class="img-box">
+            <img *ngIf="e.paymentScreenshoot" [src]="e.paymentScreenshoot" class="thumb-img"
+              (click)="openImage(e.paymentScreenshoot)">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-bg" *ngIf="showModal">
+  <div class="modal-box">
+    <h2>Add Customer</h2>
+
+    <label>Name</label>
+    <input type="text" [(ngModel)]="form.name">
+
+    <label>Mobile</label>
+    <input type="text" [(ngModel)]="form.mobile">
+
+    <label>City</label>
+    <input type="text" [(ngModel)]="form.city">
+
+    <div class="modal-actions">
+      <button class="save" (click)="submitCustomer()">Save</button>
+      <button class="cancel" (click)="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="img-modal-bg" *ngIf="showImageModal">
+  <div class="img-modal-box">
+
+    <span class="close-btn" (click)="closeImageModal()">✖</span>
+
+    <img [src]="previewImageUrl" class="full-img">
+
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>Hotel Admin</h2>
+    </div>
+
+    <ul class="menu">
+      <ul class="menu">
+        <li [routerLink]="['/home']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </li>
+        <li [routerLink]="['/home/dlist']" routerLinkActive="active"> <i class="fas fa-car"></i> Driver Management</li>
+        <li [routerLink]="['/home/all-driver']" routerLinkActive="active"> <i class="fas fa-users"></i>All Driver List
+        </li>
+        <li [routerLink]="['/home/admin']" routerLinkActive="active"> <i class="fas fa-user-tie"></i>Staff Management
+        </li>
+        <li [routerLink]="['/home/attendance']" routerLinkActive="active"> <i class="fas fa-calendar-check"></i>Staff
+          Attendance</li>
+        <li [routerLink]="['/home/allattendance']" routerLinkActive="active"> <i class="fas fa-calendar-alt"></i>All
+          Attendance</li>
+        <li [routerLink]="['/home/expensis']" routerLinkActive="active"> <i class="fas fa-money-bill-wave"></i>Hotel
+          Expensis</li>
+        <li [routerLink]="['/home/khatabook']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+          <i class="fas fa-book"></i> Khatabook
+        </li>
+
+        <li [routerLink]="['/home/pcustomer']" routerLinkActive="active"> <i class="fas fa-money-bill-wave"></i>Customer
+        </li>
+
+      </ul>
+    </ul>
+    <ul class="img">
+      <img src="../../assets/homelogo.png">
+    </ul>
+  </aside>
+
+
+  <main class="main-content">
+    <div class="topbar">
+      <h2>
+        Overview
+        <span *ngIf="branchName" class="branch-name">
+          ({{ branchName }})
+        </span>
+      </h2>
+
+      <div class="profile">
+        <span>Bl Poonam Hotel & Restaurant</span>
+      </div>
+    </div>
+    <router-outlet></router-outlet>
+  </main>
+
+  <div class="password-popup" *ngIf="showPasswordPopup">
+    <div class="popup-content">
+      <h3>Enter Password</h3>
+      <input type="password" [(ngModel)]="passwordInput" placeholder="Password">
+      <div class="popup-actions">
+        <button class="submit-btn" (click)="checkPassword()">Submit</button>
+        <button class="cancel-btn" (click)="closePopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
