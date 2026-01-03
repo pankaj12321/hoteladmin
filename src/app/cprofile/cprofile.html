@@ -22,12 +22,30 @@
     </div>
   </div>
 
-  <!-- ===== Branch Filter ===== -->
-  <div class="branch-btns">
+  <div class="branch-btns" style="margin-top: 10px;">
     <button (click)="selectBranch('ALL')">All</button>
-    <button (click)="selectBranch('Gokulpura')">Gokulpura</button>
-    <button (click)="selectBranch('Sikar')">Sikar</button>
-    <button (click)="selectBranch('Sanwali')">Sanwali</button>
+    <button *ngFor="let b of branches" (click)="selectBranch(b)">{{ b }}</button>
+  </div>
+
+  <!-- ===== DATE FILTER ===== -->
+  <div class="date-filter">
+    <div class="filter-group">
+      <label>Month:</label>
+      <select [(ngModel)]="selectedMonth" (change)="applyFilters()">
+        <option value="ALL">All Months</option>
+        <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Year:</label>
+      <select [(ngModel)]="selectedYear" (change)="applyFilters()">
+        <option value="ALL">All Years</option>
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+
+    <button class="reset-btn" (click)="resetFilters()">Reset Filters</button>
   </div>
 
   <!-- ===== ACTION BUTTONS ===== -->
@@ -51,7 +69,7 @@
 
         <!-- DATE -->
         <div class="txn-row">
-          <b>Date:</b> {{ t.returnDate | date:'dd MMM yyyy' }}
+          <b>Returndate:</b> {{ t.returnDate | date:'dd MMM yyyy' }}
         </div>
 
         <!-- BRANCH -->
@@ -60,28 +78,25 @@
         </div>
 
         <!-- PAYMENT MODE -->
-      
+
 
         <!-- DESCRIPTION -->
         <div class="txn-row">
           <b>Description:</b> {{ t.description || '-' }}
         </div>
-
-        <!-- BILL NO -->
         <div class="txn-row">
           <b>Bill No:</b> {{ t.billno || '-' }}
         </div>
-
-        <!-- UPDATED AT -->
         <div class="txn-row small">
-          <b>Updated:</b> {{ t.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
+          <b>Date:</b> {{ t.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
         </div>
-
       </div>
 
-      <!-- AMOUNT -->
-      <div class="amount">
-        ₹{{ t.Rs }} <span style="font-size: 12px; color: rgb(11, 138, 0);">{{ t.paymentMode | uppercase }}</span>
+      <div class="txn-right" style="display: grid;">
+        <i class="fa-solid fa-trash trash-btn" (click)="deleteTransaction(t)"></i>
+        <div class="amount">
+          ₹{{ t.Rs }} <span style="font-size: 12px; color: rgb(11, 138, 0);">{{ t.paymentMode | uppercase }}</span>
+        </div>
       </div>
     </div>
 
@@ -95,39 +110,119 @@
 </div>
 
 <!-- ================= POPUP FORM ================= -->
-<div class="popup" *ngIf="showPopup">
-  <div class="popup-box">
-    <h3>{{ type === 'give' ? 'You Gave Money' : 'You Got Money' }}</h3>
+<div class="popup" *ngIf="showPopup" (click)="closePopup()">
+  <div class="popup-box" (click)="$event.stopPropagation()">
 
-    <div class="popup-inputs">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3>{{ type === 'give' ? '💸 You Gave Money' : '💰 You Got Money' }}</h3>
+      <button class="close-btn" (click)="closePopup()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
 
-      <input type="number" [(ngModel)]="amount" placeholder="Enter Amount" />
+    <!-- Form Content -->
+    <div class="modal-body">
 
-      <input type="text" [(ngModel)]="description" placeholder="Enter Description" />
+      <!-- Amount Field -->
+      <div class="form-group">
+        <label class="form-label">Amount <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">₹</span>
+          <input type="number" [(ngModel)]="amount" placeholder="Enter amount" class="form-input with-icon" />
+        </div>
+      </div>
 
-      <input type="text" [(ngModel)]="billno" placeholder="Enter Bill No (optional)" />
+      <!-- Description Field -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" [(ngModel)]="description" placeholder="Enter description" class="form-input" />
+      </div>
 
-      <input type="date" [(ngModel)]="date" />
+      <!-- Bill Number Field -->
+      <div class="form-group">
+        <label class="form-label">Bill Number</label>
+        <input type="text" [(ngModel)]="billno" placeholder="Enter bill number (optional)" class="form-input" />
+      </div>
 
-      <select [(ngModel)]="selectedBranch">
-        <option value="" disabled>Select Branch</option>
-        <option *ngFor="let branch of branches" [value]="branch">
-          {{ branch }}
-        </option>
-      </select>
+      <!-- Date Fields Row -->
+      <div class="form-row">
+        <div class="form-group half">
+          <label class="form-label">Return Date</label>
+          <input type="date" [(ngModel)]="returnDate" class="form-input" />
+        </div>
 
-      <select [(ngModel)]="paymentMode">
-        <option value="cash">Cash</option>
-        <option value="online">Online</option>
-      </select>
+        <div class="form-group half">
+          <label class="form-label">Transaction Date <span class="required">*</span></label>
+          <input type="date" [(ngModel)]="transactionDate" class="form-input" />
+        </div>
+      </div>
 
-      <input type="file" accept="image/*" (change)="onImageSelect($event)" />
+      <!-- Branch & Payment Mode Row -->
+      <div class="form-row">
+        <div class="form-group half">
+          <label class="form-label">Branch <span class="required">*</span></label>
+          <select [(ngModel)]="selectedBranch" class="form-select">
+            <option value="" disabled>Select Branch</option>
+            <option *ngFor="let branch of branches" [value]="branch">{{ branch }}</option>
+          </select>
+        </div>
+
+        <div class="form-group half">
+          <label class="form-label">Payment Mode</label>
+          <select [(ngModel)]="paymentMode" class="form-select">
+            <option value="cash">💵 Cash</option>
+            <option value="online">💳 Online</option>
+            <!-- <option value="cheque">📝 Cheque</option> -->
+          </select>
+        </div>
+      </div>
+
+      <!-- File Upload -->
+      <div class="form-group">
+        <label class="form-label">Payment Screenshot</label>
+        <div class="file-input-wrapper">
+          <input type="file" accept="image/*" (change)="onImageSelect($event)" id="fileInput" class="file-input" />
+          <label for="fileInput" class="file-label">
+            <i class="fa-solid fa-cloud-upload"></i>
+            <span>{{ selectedImage ? selectedImage.name : 'Choose file or drag here' }}</span>
+          </label>
+        </div>
+      </div>
 
     </div>
 
-    <div class="actions">
-      <button class="cancel" (click)="closePopup()">Cancel</button>
-      <button class="submit" (click)="submitTransaction()">Save</button>
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-cancel" (click)="closePopup()">Cancel</button>
+      <button class="btn btn-submit" (click)="submitTransaction()">
+        <i class="fa-solid fa-check"></i> Save Transaction
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- 🔥 Delete Confirmation Modal -->
+<div class="delete-modal" *ngIf="showDeleteModal">
+  <div class="delete-modal-content">
+    <div class="delete-icon">🗑️</div>
+    <h3>Delete Transaction?</h3>
+    <p>Are you sure you want to delete this transaction? This action cannot be undone.</p>
+
+    <div class="delete-modal-actions">
+      <button class="cancel-btn" (click)="closeDeleteModal()">Cancel</button>
+      <button class="delete-btn" (click)="confirmDelete()">Delete</button>
     </div>
   </div>
+</div>
+
+<!-- 🔥 Toast Notification -->
+<div class="toast-notification" [class.show]="toast.show" [ngClass]="toast.type">
+  <div class="toast-icon">
+    <span *ngIf="toast.type === 'success'">✓</span>
+    <span *ngIf="toast.type === 'error'">✗</span>
+    <span *ngIf="toast.type === 'info'">ℹ</span>
+  </div>
+  <div class="toast-message">{{ toast.message }}</div>
 </div>

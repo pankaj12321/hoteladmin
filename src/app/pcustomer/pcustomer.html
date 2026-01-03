@@ -1,71 +1,51 @@
-<div class="pcustomer-container">
-
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <input type="text" class="search-input" placeholder="Search by Name / Mobile / City" [(ngModel)]="searchTerm"
-      (input)="searchCustomer()" />
-
-    <button class="add-btn" type="button" (click)="openModal()">
-      + Add Customer
-    </button>
-  </div>
-
-  <!-- CUSTOMER TABLE -->
-  <div class="table-wrapper" >
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Mobile</th>
-          <th>City</th>
-          <th>Created</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let c of filteredCustomers; let i = index" class="row-click"     (click)="openProfile(c.personalCustomerRecordTranId)">
-          <td>{{ i + 1 }}</td>
-          <td>{{ c.name }}</td>
-          <td>{{ c.mobile }}</td>
-          <td>{{ c.city || '-' }}</td>
-          <td>{{ c.createdAt | date:'dd MMM yyyy' }}</td>
-        </tr>
-
-
-        <tr *ngIf="filteredCustomers.length === 0">
-          <td colspan="5" class="no-data">No customer found</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<div class="top-bar">
+  <h3 style="margin-top: 14px;">Regular Customer</h3>
+  <button class="add-btn" (click)="openModal()">+ Add Customer</button>
 </div>
 
-<!-- ================= MODAL ================= -->
-<div class="modal-overlay" *ngIf="showModal">
+
+<!-- 🔴 MODAL -->
+<div class="modal-backdrop" *ngIf="showModal">
   <div class="modal-box">
 
-    <h2>Add Personal Customer</h2>
+    <h3>{{ isEditMode ? 'Edit Customer' : 'Add Customer' }}</h3>
 
-    <div class="form-group">
-      <label>Name</label>
-      <input type="text" [(ngModel)]="customer.name" />
-    </div>
+    <!-- INPUT 1 -->
+    <input type="text" placeholder="Customer Name" [(ngModel)]="customer.name">
 
-    <div class="form-group">
-      <label>Mobile</label>
-      <input type="text" maxlength="10" [(ngModel)]="customer.mobile" />
-    </div>
+    <!-- INPUT 2 -->
+    <input type="text" placeholder="Mobile Number" [(ngModel)]="customer.mobile">
 
-    <div class="form-group">
-      <label>City</label>
-      <input type="text" [(ngModel)]="customer.city" />
-    </div>
+    <input type="text" placeholder="City" [(ngModel)]="customer.city">
 
-    <div class="modal-actions">
-      <button class="save-btn" (click)="addCustomer()">Save</button>
+    <div class="btns">
+      <button class="save-btn" (click)="isEditMode ? updateCustomer() : addCustomer()">
+        {{ isEditMode ? 'Update' : 'Save' }}
+      </button>
       <button class="cancel-btn" (click)="closeModal()">Cancel</button>
     </div>
 
   </div>
 </div>
+
+<hr>
+
+<table border="1" width="100%" class="list">
+  <tr>
+    <th>Name</th>
+    <th>Mobile</th>
+    <th>City</th>
+    <th>Action</th>
+  </tr>
+
+  <!-- 🔴 ngFor -->
+  <tr *ngFor="let c of customers; let i = index">
+    <td>{{ c.name }}</td>
+    <td>{{ c.mobile }}</td>
+    <td>{{ c.city || '-' }}</td>
+    <td>
+      <button class="profile-btn" (click)="openProfile(c)">Profile</button>
+      <button class="edit-btn" (click)="editCustomer(c)">Edit</button>
+    </td>
+  </tr>
+</table>

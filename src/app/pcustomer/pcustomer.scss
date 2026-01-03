@@ -1,122 +1,157 @@
-.pcustomer-container {
-  padding: 15px;
-  background: #ffeded;
-}
-.top-bar {
+.top-bar{
+  padding: 10px;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
 }
-
-.search-input {
-  width: 980px;
-  padding: 8px;
-  border: 1px solid #220000;
-  border-radius: 4px;
-}
-
-.add-btn {
-  background: #550000;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* TABLE */
-.table-wrapper {
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: #f1f5f9;
-  padding: 10px;
-  text-align: left;
-}
-
-td {
-  padding: 10px;
-  border-top: 1px solid #eee;
-}
-
-.no-data {
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
   text-align: center;
-  padding: 20px;
+  margin-bottom: 20px;
 }
 
-/* MODAL */
-.modal-overlay {
+button {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+/* ================= ADD CUSTOMER BUTTON ================= */
+button.add-btn {
+  padding: 8px 15px;
+  background-color: #4b0101;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 500;
+  margin-top: 12px;
+  margin-left: 12px;
+}
+
+/* ================= MODAL ================= */
+.modal-backdrop {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 9999;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-box {
-  background: #fff;
-  width: 360px;
-  padding: 20px;
+  background-color: white;
+  padding: 25px 20px;
   border-radius: 8px;
+  width: 350px;
+  max-width: 90%;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  position: relative;
 }
 
-.modal-box h2 {
-  margin-bottom: 15px;
+.modal-box h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
 }
 
-.form-group {
-  margin-bottom: 12px;
-}
-
-.form-group label {
-  font-size: 13px;
-  color: #555;
-}
-
-.form-group input {
+.modal-box input {
   width: 100%;
-  padding: 8px;
-  margin-top: 4px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  font-size: 14px;
 }
 
-.modal-actions {
+.modal-box .btns {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.modal-box .btns button {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 5px;
+  border: none;
+  font-weight: 500;
+  margin: 0 5px;
+}
+
+.modal-box .btns button.save-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.modal-box .btns button.cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+/* ================= TABLE ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
   margin-top: 15px;
 }
 
-.save-btn {
-  background: #f5a801;
-  color: white;
-  border: none;
-  padding: 7px 14px;
-  border-radius: 4px;
+table th, table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 14px;
 }
 
-.cancel-btn {
-  background: #350000;
-  color: white;
-  border: none;
-  padding: 7px 14px;
-  border-radius: 4px;
-}
-.row-click {
-  cursor: pointer;
+table th {
+  background-color: #f4f4f4;
+  font-weight: 600;
 }
 
-.row-click {
-  background: #f5f7fa;
+table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* ================= ACTION BUTTONS IN TABLE ================= */
+table td button {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+table td button.profile-btn {
+  background-color: #2196F3;
+  color: white;
+}
+
+table td button.edit-btn {
+  background-color: #FFC107;
+  color: white;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 500px) {
+  .modal-box {
+    width: 90%;
+    padding: 20px;
+  }
+
+  table th, table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  button {
+    font-size: 12px;
+  }
 }

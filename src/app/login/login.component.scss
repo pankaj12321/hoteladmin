@@ -8,17 +8,26 @@
 
 /* Page Background */
 .login-page {
-  background-color: #fff9e6;
+  background-image: url("../../assets/background.avif");
   height: 100vh;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background-repeat: no-repeat;
+  /* ❌ repeat बंद */
+  background-size: cover;
+  /* ✅ पूरी screen cover */
+  background-position: center;
+  /* ✅ center से fit */
 }
+
 
 /* Wrapper for Form + Video */
 .login-wrapper {
   display: flex;
-  background-color: #fef3c7;
+  background-color: #ffffff;
   border-radius: 15px;
   overflow: hidden;
   width: 100%;
@@ -43,7 +52,7 @@
 }
 
 .heading {
-  color: rgba(113, 104, 73, 1);
+  color: rgb(0, 62, 143);
   font-size: 20px;
   margin-bottom: 25px;
   font-weight: 600;
@@ -84,7 +93,7 @@
 
 button {
   width: 100%;
-  background-color:rgb(35, 41, 2);
+  background-color: rgb(6, 8, 143);
   color: white;
   border: none;
   padding: 12px;
@@ -96,12 +105,13 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background-color: #3c3c07;
+  background-color: #6e0000;
 }
 
 button:disabled {
-  background-color: #999;
+  background-color: #570000;
   cursor: not-allowed;
+  border-top: 2px solid rgb(230, 0, 0);
 }
 
 /* Right Video Section */
@@ -112,9 +122,8 @@ button:disabled {
 }
 
 .login-right img {
-  width: 100%;
-  height: 100%;
-  margin-bottom: 30px;
+  width: 90%;
+  height: 90%;
   object-fit: cover;
 }
 

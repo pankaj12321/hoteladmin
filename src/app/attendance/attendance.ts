@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-attendance',
@@ -18,6 +19,13 @@ export class Attendance {
   selectedStaff: any = null;
   selectedAttendance: string = '';
   selectedEditAttendance: string = '';
+
+  // 🔥 Toast Notification
+  toast = {
+    show: false,
+    message: '',
+    type: '' as 'success' | 'error' | 'info'
+  };
 
   constructor(private http: HttpClient) { }
 
@@ -133,10 +141,13 @@ export class Attendance {
     this.http.post('Http://localhost:5000/api/admin/attendance/marked-for-staff', payload, { headers })
       .subscribe({
         next: () => {
-          alert('Attendance Marked!');
           this.selectedStaff.attendance = mapped;
           this.selectedStaff.attendanceMarked = true;
           this.closeModal();
+          this.showToast('success', '✓ Attendance Marked Successfully!');
+        },
+        error: () => {
+          this.showToast('error', '✗ Failed to Mark Attendance');
         }
       });
   }
@@ -177,9 +188,12 @@ export class Attendance {
     this.http.patch('Http://localhost:5000/api/admin/attendance/edit/staff-attendance', payload, { headers })
       .subscribe({
         next: () => {
-          alert('Attendance Updated!');
           this.selectedStaff.attendance = this.selectedEditAttendance;
           this.closeEditModal();
+          this.showToast('success', '✓ Attendance Updated Successfully!');
+        },
+        error: () => {
+          this.showToast('error', '✗ Failed to Update Attendance');
         }
       });
   }
@@ -189,14 +203,25 @@ export class Attendance {
     this.selectedEditAttendance = '';
     this.selectedStaff = null;
   }
-  filterByBranch(branch: string) {
-  if (branch === 'ALL') {
-    this.filteredStaff = [...this.staffList];
-  } else {
-    this.filteredStaff = this.staffList.filter(
-      s => s.branchName === branch
-    );
+
+  // 🔥 Show Toast Notification
+  showToast(type: 'success' | 'error' | 'info', message: string) {
+    this.toast.type = type;
+    this.toast.message = message;
+    this.toast.show = true;
+
+    setTimeout(() => {
+      this.toast.show = false;
+    }, 1000); // ✅ 1 second timing
   }
-}
+  filterByBranch(branch: string) {
+    if (branch === 'ALL') {
+      this.filteredStaff = [...this.staffList];
+    } else {
+      this.filteredStaff = this.staffList.filter(
+        s => s.branchName === branch
+      );
+    }
+  }
 
 }

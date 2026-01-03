@@ -1,112 +1,81 @@
-.header {
-  padding: 15px;
-  color: #f7690a;
-  text-align: center;
-  font-weight: bold;
+.container {
+  padding: 20px;
 }
 
-/* SEARCH BAR */
 .top-bar {
   display: flex;
-  gap: 10px;
-  padding: 15px;
+  justify-content: space-between;
+  margin-bottom: 15px;
 }
 
-.top-bar input {
-  flex: 1;
+.total-box {
+  background: #f0f0f0;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+
+.right-bar input {
+  padding: 8px;
+  margin-right: 10px;
+}
+
+.right-bar button {
+  padding: 8px 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
   padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ff5b1a;
+  border: 1px solid #ddd;
 }
 
-.top-bar button {
-  background: #ff6c0a;
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+tr {
   cursor: pointer;
 }
 
-/* OVERLAY */
-.form-overlay {
+tr:hover {
+  background: #f9f9f9;
+}
+
+/* MODAL */
+.modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;   /* ⭐ IMPORTANT */
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
+  align-items: center;
 }
 
-/* CENTER FORM */
-.add-form {
-  width: 320px;
+
+.modal-content {
   background: #fff;
+  width: 300px;
   padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  margin: 100px auto;
+  border-radius: 6px;
 }
 
-.add-form h3 {
-  text-align: center;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.add-form input {
+.modal-content input {
   width: 100%;
-  margin-bottom: 12px;
-  padding: 9px;
-  border-radius: 8px;
-  border: 1px solid #ff6d18;
+  padding: 8px;
+  margin-bottom: 10px;
 }
 
-/* FORM BUTTONS */
-.form-actions {
+.modal-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
-}
-
-.save {
-  background: #28a745;
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
-  cursor: pointer;
 }
 
 .cancel {
-  background: #dc3545;
+  background: red;
   color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* GRID (3 PER ROW) */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  padding: 15px;
-}
-
-.card {
-  width:380px;
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgb(255, 191, 165);
-  cursor: pointer;
-}
-
-.card h3 {
-  margin: 0 0 6px;
 }

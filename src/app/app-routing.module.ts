@@ -42,7 +42,8 @@ const routes: Routes = [
       { path: 'khatabook', component: Khatabook },
       { path: 'khatabookprofile/:id', component: Khatabookprofile },
       { path: 'pcustomer', component: Pcustomer },
-      { path: 'pcprofile', component: Pcprofile },
+      { path: 'pcprofile/:id', component: Pcprofile }
+
     ]
   }
 ];

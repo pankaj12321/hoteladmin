@@ -46,6 +46,14 @@ export class DlistComponent implements OnInit {
     type: ''
   };
 
+  branches = ['Gokulpurabranch', 'Sikarbranch', 'Sanwalibranch'];
+  branchStats: Record<string, number> = {
+    Gokulpurabranch: 0,
+    Sikarbranch: 0,
+    Sanwalibranch: 0
+  };
+  totalEntries = 0;
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -104,6 +112,30 @@ export class DlistComponent implements OnInit {
           yearSet.add(new Date(e.entryDate).getFullYear());
         });
         this.years = Array.from(yearSet).sort((a, b) => b - a);
+
+        // 🔥 Calculate branch statistics
+        this.calculateBranchStats();
+      }
+    });
+  }
+
+  // 🔹 Calculate Branch Statistics
+  calculateBranchStats() {
+    // Reset counts
+    this.branchStats = {
+      Gokulpurabranch: 0,
+      Sikarbranch: 0,
+      Sanwalibranch: 0
+    };
+
+    // Use filtered commissions instead of allCommissions
+    this.totalEntries = this.commissions.length;
+
+    // Count entries per branch from filtered data
+    this.commissions.forEach(entry => {
+      const branch = entry.branchName;
+      if (branch in this.branchStats) {
+        this.branchStats[branch as keyof typeof this.branchStats]++;
       }
     });
   }
@@ -123,6 +155,9 @@ export class DlistComponent implements OnInit {
 
       return monthMatch && yearMatch;
     });
+
+    // 🔥 Update branch stats after filtering
+    this.calculateBranchStats();
   }
 
   // 🔹 Add Commission

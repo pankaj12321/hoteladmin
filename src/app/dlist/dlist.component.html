@@ -38,23 +38,40 @@
     </div>
 
   </div>
-<div class="filter-bar">
-  <select [(ngModel)]="selectedMonth" (change)="filterByMonthYear()">
-    <option value="">All Months</option>
-    <option *ngFor="let m of months; let i = index" [value]="i">
-      {{ m }}
-    </option>
-  </select>
+  <div class="filter-bar">
+    <select [(ngModel)]="selectedMonth" (change)="filterByMonthYear()">
+      <option value="">All Months</option>
+      <option *ngFor="let m of months; let i = index" [value]="i">
+        {{ m }}
+      </option>
+    </select>
 
-  <select [(ngModel)]="selectedYear" (change)="filterByMonthYear()">
-    <option value="">All Years</option>
-    <option *ngFor="let y of years" [value]="y">
-      {{ y }}
-    </option>
-  </select>
-</div>
+    <select [(ngModel)]="selectedYear" (change)="filterByMonthYear()">
+      <option value="">All Years</option>
+      <option *ngFor="let y of years" [value]="y">
+        {{ y }}
+      </option>
+    </select>
+  </div>
 
-  <!-- 🔹 Bottom: Commission Entries List -->
+  <!-- � Branch Statistics Cards -->
+  <div class="branch-stats-container">
+    <h3>Branch-wise Entry Summary</h3>
+    <div class="stats-cards">
+      <div class="stat-card" *ngFor="let branch of branches">
+        <div class="stat-label">{{ branch }}</div>
+        <div class="stat-value">{{ branchStats[branch] }}</div>
+        <div class="stat-subtitle">Entries</div>
+      </div>
+      <div class="stat-card total">
+        <div class="stat-label">Total Entries</div>
+        <div class="stat-value">{{ totalEntries }}</div>
+        <div class="stat-subtitle">All Branches</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- �🔹 Bottom: Commission Entries List -->
   <div class="bottom-section">
     <h3>Commission Entries</h3>
     <table class="table table-bordered" *ngIf="commissions.length > 0; else noData">

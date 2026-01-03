@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient , HttpHeaders  } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-khatabook',
@@ -7,82 +7,94 @@ import { Router } from '@angular/router';
   styleUrls: ['./khatabook.scss']
 })
 export class Khatabook {
- 
- 
-  peopleList: any[] = [];
-  filteredList: any[] = [];
-  searchText = '';
+  users: any[] = [];
+  filteredUsers: any[] = [];
+  searchTerm = '';
+  showModal = false;
 
-  newPerson = {
-    name: '',
-    mobile: '',
-    email: ''
-  };
+  // form fields
+  name = '';
+  mobile = '';
+  city = '';
 
-  showAddForm = false;
+  constructor(private http: HttpClient, private router: Router) { }
 
-  constructor(
-    private http: HttpClient,
-    private router: Router   // 👈 MUST inject
-  ) {}
-
-  ngOnInit(): void {
-    this.loadPeople();
+  ngOnInit() {
+    this.getUsers();
   }
 
-  /** 🔐 HEADER WITH TOKEN */
-  getHeaders() {
-    const token = localStorage.getItem('token'); // login ke baad save hona chahiye
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+  getUsers() {
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
-  }
 
-  /** ✅ GET PEOPLE */
-  loadPeople() {
     this.http.get<any>(
-      'Http://localhost:5000/api/admin/get/personal/transectional/user',
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: (res) => {
-        this.peopleList = res.data ? res.data : res;
-        this.filteredList = this.peopleList;
-      },
-      error: (err) => {
-        console.error('GET ERROR', err);
+      'http://localhost:5000/api/admin/get/khatabook/users',
+      { headers }
+    ).subscribe(res => {
+      console.log('Users API Response:', res);
+      this.users = res.data || res;
+      console.log('Users array:', this.users);
+      if (this.users && this.users.length > 0) {
+        console.log('First user sample:', this.users[0]);
       }
+      this.filteredUsers = this.users;
     });
   }
 
-  /** 🔍 SEARCH */
-  searchPeople() {
-    const value = this.searchText.toLowerCase();
-    this.filteredList = this.peopleList.filter(p =>
-      p.name?.toLowerCase().includes(value) ||
-      p.mobile?.includes(value)
+
+  searchUser() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredUsers = this.users.filter(u =>
+      u.name.toLowerCase().includes(term) ||
+      u.mobile.includes(term)
     );
   }
 
-  /** ➕ ADD PERSON */
-  addPerson() {
+  openModal() {
+    this.showModal = true;
+    console.log("sdsfds");
+
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.name = '';
+    this.mobile = '';
+    this.city = '';
+  }
+
+  addUser() {
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const payload = {
+      name: this.name,
+      mobile: this.mobile,
+      city: this.city
+    };
+
     this.http.post(
-      'Http://localhost:5000/api/admin/add/earExp/subject',
-      this.newPerson,
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: () => {
-        this.loadPeople();
-        this.newPerson = { name: '', mobile: '', email: '' };
-        this.showAddForm = false;
-      },
-      error: (err) => {
-        console.error('POST ERROR', err);
-      }
+      'http://localhost:5000/api/admin/add/khatabook/user',
+      payload,
+      { headers }
+    ).subscribe(() => {
+      this.closeModal();
+      this.getUsers();
     });
   }
 
-  /** 👉 OPEN PROFILE */
-  openProfile(personalId: string) {
-    this.router.navigate(['/home/khatabookprofile', personalId]);
+  openProfile(user: any) {
+    console.log('Opening profile for user:', user);
+    console.log('khatabookUserId:', user.khatabookUserId);
+    this.router.navigate(['/home/khatabookprofile', user.khatabookUserId]);
+    console.log('Navigating to khatabook profile for user:', user.khatabookUserId);
+
   }
+
 }

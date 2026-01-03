@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-pcprofile',
@@ -8,188 +8,152 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./pcprofile.scss']
 })
 export class Pcprofile implements OnInit {
-  showModal = false;
-  showEditModal = false;
-  tranType: 'given' | 'taken' = 'given';
 
-  form: any = {
-    Rs: '',
+
+  customer: any;
+  customerId: string | null = null;
+
+  entry = {
+    billAmount: '',
+    amountPaidAfterDiscount: '',
     paymentMode: 'cash',
     description: '',
-    returnDate: '',
-    billno: ''
+    status: 'Pending'
   };
 
-  editForm: any = {};
-  selectedFile: File | null = null;
-
-  customerId!: string;
-  customerData: any;
-
-  transactionsGiven: any[] = [];
-  transactionsTaken: any[] = [];
+  paymentScreenshot: File | null = null;
+  entries: any[] = [];
+  api = 'http://localhost:5000/api/admin';
+  loadingEntries = false;
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.customerId = params['personalCustomerRecordTranId'];
-      if (this.customerId) {
-        this.getProfile();
+  ngOnInit() {
+    this.customerId = this.route.snapshot.paramMap.get('id');
+    this.getCustomerProfile();
+    this.getCustomerEntries();
+  }
+
+  // 🔵 GET CUSTOMER PROFILE
+  getCustomerProfile() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    this.http.get<any>(
+      `${this.api}/get/personal/customer/users?personalCustomerRecordTranId=${this.customerId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe(res => {
+      this.customer = res.data[0];
+    });
+  }
+
+  // 🔵 GET CUSTOMER ENTRIES
+  getCustomerEntries() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    this.loadingEntries = true;
+    this.http.get<any>(
+      `${this.api}/get/personal/customer/entry?personalCustomerRecordTranId=${this.customerId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next: res => {
+        this.entries = res.data || [];
+        this.loadingEntries = false;
+      },
+      error: err => {
+        console.error(err);
+        this.loadingEntries = false;
       }
     });
   }
 
-  getProfile(): void {
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-
-    this.http.get<any>(
-      `http://localhost:5000/api/admin/get/personal/customer/users?personalCustomerRecordTranId=${this.customerId}`,
-      { headers }
-    ).subscribe({
-      next: (res) => {
-        this.customerData = res.data[0];
-        this.getTransactions();
-      },
-      error: (err) => console.error('Profile API error', err)
-    });
-  }
-
-  getTransactions(): void {
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-
-    this.http.get<any>(
-      `http://localhost:5000/api/admin/get/personal/customer/transection?personalCustomerRecordTranId=${this.customerData.personalCustomerRecordTranId}`,
-      { headers }
-    ).subscribe({
-      next: (res) => {
-        this.transactionsGiven = [];
-        this.transactionsTaken = [];
-
-        if (res.data && res.data.length > 0) {
-          const record = res.data[0];
-
-          if (record.givenToAdmin && record.givenToAdmin.length > 0) {
-            this.transactionsGiven = record.givenToAdmin;
-          }
-
-          if (record.takenFromAdmin && record.takenFromAdmin.length > 0) {
-            this.transactionsTaken = record.takenFromAdmin;
-          }
-        }
-      },
-      error: (err) => console.error('Transaction fetch error', err)
-    });
-  }
-  // BILL MODAL
-  showBillModal = false;
-  billUrl: string = '';
-
-  openBill(url: string) {
-    this.billUrl = url;
-    this.showBillModal = true;
-  }
-
-  closeBillModal() {
-    this.billUrl = '';
-    this.showBillModal = false;
-  }
-
-  openModal(type: 'given' | 'taken'): void {
-    this.tranType = type;
-    this.showModal = true;
-  }
-
-  closeModal(): void {
-    this.showModal = false;
-    this.form = { Rs: '', paymentMode: 'cash', description: '', returnDate: '', billno: '' };
-    this.selectedFile = null;
-  }
-
-  openEditModal(transaction: any, type: 'given' | 'taken'): void {
-    this.showEditModal = true;
-    this.editForm = { ...transaction };
-    this.tranType = type;
-  }
-
-  closeEditModal(): void {
-    this.showEditModal = false;
-    this.editForm = {};
-  }
-
-  onFileSelect(event: any): void {
-    if (event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
+  // 🔵 FILE SELECT
+  onFileSelect(event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      this.paymentScreenshot = event.target.files[0];
+      console.log('Selected File:', this.paymentScreenshot);
+    } else {
+      this.paymentScreenshot = null;
     }
   }
 
-  submitTransaction(): void {
+  // 🔵 ADD ENTRY (FormData POST)
+  addEntry() {
     const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
+    if (!token) return alert('Token missing');
+    if (!this.customerId) return alert('Customer ID missing');
+
+    // Validate required fields
+    if (!this.entry.billAmount || this.entry.billAmount === '') {
+      return alert('Bill Amount is required');
+    }
+    if (!this.entry.amountPaidAfterDiscount || this.entry.amountPaidAfterDiscount === '') {
+      return alert('Amount Paid After Discount is required');
+    }
+    if (!this.entry.paymentMode) {
+      return alert('Payment Mode is required');
+    }
 
     const formData = new FormData();
-    formData.append('personalCustomerRecordTranId', this.customerData.personalCustomerRecordTranId);
 
-    const tranObj = { ...this.form };
+    // REQUIRED FIELDS
+    formData.append('personalCustomerRecordTranId', String(this.customerId));
+    formData.append('billAmount', String(this.entry.billAmount));
+    formData.append('amountPaidAfterDiscount', String(this.entry.amountPaidAfterDiscount));
+    formData.append('paymentMode', String(this.entry.paymentMode));
+    formData.append('description', String(this.entry.description || ''));
+    formData.append('status', String(this.entry.status));
 
-    if (this.tranType === 'given') {
-      formData.append('givenToAdmin', JSON.stringify(tranObj));
-    } else {
-      formData.append('takenFromAdmin', JSON.stringify(tranObj));
+    // FILE - only append if file is selected (matching pattern from expense/earning APIs)
+    if (this.paymentScreenshot) {
+      formData.append('paymentScreenshoot', this.paymentScreenshot);
     }
 
-    if (this.selectedFile) formData.append('paymentScreenshoot', this.selectedFile);
+    // Debug: Log FormData contents
+    console.log('📤 Submitting Personal Customer Entry:');
+    console.log('personalCustomerRecordTranId:', this.customerId);
+    console.log('billAmount:', this.entry.billAmount);
+    console.log('amountPaidAfterDiscount:', this.entry.amountPaidAfterDiscount);
+    console.log('paymentMode:', this.entry.paymentMode);
+    console.log('description:', this.entry.description);
+    console.log('status:', this.entry.status);
+    console.log('paymentScreenshot file:', this.paymentScreenshot ? this.paymentScreenshot.name : 'No file selected');
+
+    // Log all FormData entries
+    console.log('\n🔍 FormData entries:');
+    for (let pair of (formData as any).entries()) {
+      console.log(pair[0], ':', pair[1]);
+    }
 
     this.http.post(
-      'http://localhost:5000/api/admin/add/personal/customer/transection',
+      `${this.api}/add/personal/customer/entry`,
       formData,
-      { headers }
+      { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: () => {
-        alert('Transaction Added Successfully');
-        this.closeModal();
-        this.getTransactions();
+        alert('Entry Added Successfully');
+
+        this.entry = {
+          billAmount: '',
+          amountPaidAfterDiscount: '',
+          paymentMode: 'cash',
+          description: '',
+          status: 'Pending'
+        };
+
+        this.paymentScreenshot = null;
+        this.getCustomerEntries();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
-        alert('Transaction Failed');
+        alert(err.error?.message || 'Error adding entry');
       }
     });
   }
 
-  updateTransaction(): void {
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
 
-    const payload: any = {
-      personalCustomerRecordTranId: this.customerData.personalCustomerRecordTranId,
-      _id: this.editForm._id,
-      Rs: this.editForm.Rs,
-      paymentMode: this.editForm.paymentMode,
-      description: this.editForm.description,
-      returnDate: this.editForm.returnDate,
-      billno: this.editForm.billno
-    };
-
-    this.http.patch(
-      'http://localhost:5000/api/admin/update/personal/customer/transection/entry',
-      payload,
-      { headers }
-    ).subscribe({
-      next: () => {
-        alert('Transaction Updated');
-        this.closeEditModal();
-        this.getTransactions();
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Update Failed');
-      }
-    });
-  }
 }

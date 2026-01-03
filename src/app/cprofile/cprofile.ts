@@ -2,13 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
+/* ================= TYPES ================= */
+type PaymentMode = 'cash' | 'online' | 'cheque';
+type TransactionType = 'give' | 'get' | '';
+
 @Component({
   selector: 'app-cprofile',
   templateUrl: './cprofile.html',
   styleUrls: ['./cprofile.scss']
 })
 export class Cprofile implements OnInit {
-customer: any = null;
+
+  customer: any = null;
 
   allGivenList: any[] = [];
   allTakenList: any[] = [];
@@ -18,21 +23,52 @@ customer: any = null;
   totalTaken = 0;
   finalBalance = 0;
 
-  id: string = "";
+  id: string = '';
 
-  // popup fields
+  /* ================= POPUP FIELDS ================= */
   showPopup = false;
-  type: 'give' | 'get' | '' = '';
-  amount: number = 0;
-  description: string = '';
-  billno: string = '';
-  date: string = '';
-  paymentMode: 'cash' | 'online' = 'cash'; // ✅ payment mode
+  type: TransactionType = '';
+  amount = 0;
+  description = '';
+  billno = '';
+  returnDate = '';  // User-selected, no default
+  transactionDate = '';  // Auto-filled with today's date
+  paymentMode: PaymentMode = 'cash';   // ✅ FIXED
   selectedImage: File | null = null;
 
-  // branch
-  branches: string[] = ['Gokulpura', 'Sikar', 'Sanwali'];
+  /* ================= BRANCH ================= */
+  branches: string[] = ['Gokulpura', 'Sikar', 'Sawlibranch'];
   selectedBranch: string = 'ALL';
+
+  /* ================= DATE FILTER ================= */
+  selectedMonth: string = 'ALL';
+  selectedYear: string = 'ALL';
+  months = [
+    { value: '0', label: 'January' },
+    { value: '1', label: 'February' },
+    { value: '2', label: 'March' },
+    { value: '3', label: 'April' },
+    { value: '4', label: 'May' },
+    { value: '5', label: 'June' },
+    { value: '6', label: 'July' },
+    { value: '7', label: 'August' },
+    { value: '8', label: 'September' },
+    { value: '9', label: 'October' },
+    { value: '10', label: 'November' },
+    { value: '11', label: 'December' }
+  ];
+  years: number[] = [];
+
+  /* ================= TOAST ================= */
+  toast = {
+    show: false,
+    message: '',
+    type: '' as 'success' | 'error' | 'info'
+  };
+
+  /* ================= DELETE MODAL ================= */
+  showDeleteModal = false;
+  transactionToDelete: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,11 +77,21 @@ customer: any = null;
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') || '';
+    this.generateYears();
     this.getCustomer();
     this.getTransactionRecord();
   }
 
-  // ================= HEADERS =================
+  /* ================= GENERATE YEARS ================= */
+  generateYears() {
+    const currentYear = new Date().getFullYear();
+    this.years = [];
+    for (let i = 0; i < 5; i++) {
+      this.years.push(currentYear - i);
+    }
+  }
+
+  /* ================= HEADERS ================= */
   getHeaders() {
     const token = localStorage.getItem('token') || '';
     return {
@@ -55,17 +101,7 @@ customer: any = null;
     };
   }
 
-  // ================= CUSTOMER =================
-  getCustomer() {
-    this.http.get(
-      `http://localhost:5000/api/admin/get/transection-user?transectionUserId=${this.id}`,
-      this.getHeaders()
-    ).subscribe((res: any) => {
-      this.customer = res.data?.[0] || null;
-    });
-  }
-
-  // ================= TRANSACTIONS =================
+  /* ================= TRANSACTIONS ================= */
   getTransactionRecord() {
     this.http.get(
       `http://localhost:5000/api/admin/get/transection-record?transectionUserId=${this.id}`,
@@ -76,6 +112,7 @@ customer: any = null;
       if (!data) return;
 
       this.allGivenList = data.givenToAdmin.map((x: any) => ({
+        _id: x._id,
         type: 'give',
         Rs: x.Rs,
         paymentMode: x.paymentMode,
@@ -89,6 +126,7 @@ customer: any = null;
       }));
 
       this.allTakenList = data.takenFromAdmin.map((x: any) => ({
+        _id: x._id,
         type: 'get',
         Rs: x.Rs,
         paymentMode: x.paymentMode,
@@ -101,35 +139,62 @@ customer: any = null;
         paymentScreenshot: x.paymentScreenshoot
       }));
 
-      this.applyBranchFilter();
+      this.applyFilters();
     });
   }
 
-  // ================= BRANCH FILTER =================
-  selectBranch(branch: string) {
-    this.selectedBranch = branch;
-    this.applyBranchFilter();
+  /* ================= CUSTOMER ================= */
+  getCustomer() {
+    this.http.get(
+      `http://localhost:5000/api/admin/get/transection-user?transectionUserId=${this.id}`,
+      this.getHeaders()
+    ).subscribe((res: any) => {
+      this.customer = res.data?.[0] || null;
+    });
   }
 
-  applyBranchFilter() {
+  /* ================= FILTER ================= */
+  selectBranch(branch: string) {
+    this.selectedBranch = branch;
+    this.applyFilters();
+  }
 
-    if (this.selectedBranch === 'ALL') {
-      this.finalTransactionList = [
-        ...this.allGivenList,
-        ...this.allTakenList
-      ];
-    } else {
-      this.finalTransactionList = [
-        ...this.allGivenList.filter(x => x.hotelBranchName === this.selectedBranch),
-        ...this.allTakenList.filter(x => x.hotelBranchName === this.selectedBranch)
-      ];
+  applyFilters() {
+    // Step 1: Combine all transactions
+    let allTransactions = [...this.allGivenList, ...this.allTakenList];
+
+    // Step 2: Apply branch filter
+    const selectedBranchLower = this.selectedBranch.toLowerCase().trim();
+    if (selectedBranchLower !== 'all') {
+      allTransactions = allTransactions.filter(
+        x => (x.hotelBranchName || '').toLowerCase().trim() === selectedBranchLower
+      );
     }
 
-    // sort by date
-    this.finalTransactionList.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    // Step 3: Apply date filter (month and year)
+    if (this.selectedMonth !== 'ALL' || this.selectedYear !== 'ALL') {
+      allTransactions = allTransactions.filter(x => {
+        if (!x.updatedAt) return false;
+
+        const txnDate = new Date(x.updatedAt);
+        const txnMonth = txnDate.getMonth();
+        const txnYear = txnDate.getFullYear();
+
+        let matchesMonth = this.selectedMonth === 'ALL' || txnMonth === Number(this.selectedMonth);
+        let matchesYear = this.selectedYear === 'ALL' || txnYear === Number(this.selectedYear);
+
+        return matchesMonth && matchesYear;
+      });
+    }
+
+    // Step 4: Sort by date (newest first)
+    this.finalTransactionList = allTransactions.sort(
+      (a, b) =>
+        new Date(b.returnDate || b.updatedAt).getTime() -
+        new Date(a.returnDate || a.updatedAt).getTime()
     );
 
+    // Step 5: Calculate totals based on filtered data
     this.totalGiven = this.finalTransactionList
       .filter(x => x.type === 'give')
       .reduce((sum, x) => sum + Number(x.Rs), 0);
@@ -141,17 +206,31 @@ customer: any = null;
     this.finalBalance = this.totalGiven - this.totalTaken;
   }
 
-  // ================= POPUP =================
-  openPopup(type: 'give' | 'get') {
+  resetFilters() {
+    this.selectedBranch = 'ALL';
+    this.selectedMonth = 'ALL';
+    this.selectedYear = 'ALL';
+    this.applyFilters();
+  }
+
+  /* ================= POPUP ================= */
+  openPopup(type: TransactionType) {
     this.type = type;
     this.showPopup = true;
     this.amount = 0;
     this.description = '';
     this.billno = '';
-    this.date = new Date().toISOString().split('T')[0]; // today
+    this.returnDate = '';  // Empty by default - user must select
+    this.transactionDate = new Date().toISOString().split('T')[0];  // Today's date
     this.selectedImage = null;
-    this.selectedBranch = this.branches[0];
-    this.paymentMode = 'cash'; // default
+
+    const loginBranch = localStorage.getItem('branchName');
+    this.selectedBranch =
+      loginBranch && this.branches.includes(loginBranch)
+        ? loginBranch
+        : this.branches[0];
+
+    this.paymentMode = 'cash';
   }
 
   closePopup() {
@@ -160,19 +239,19 @@ customer: any = null;
   }
 
   onImageSelect(event: any) {
-    this.selectedImage = event.target.files[0];
+    this.selectedImage = event.target.files?.[0] || null;
   }
 
-  // ================= SUBMIT =================
+  /* ================= SUBMIT ================= */
   submitTransaction() {
 
     if (!this.amount || this.amount <= 0) {
-      alert('Enter valid amount');
+      this.showToast('error', '✗ Enter valid amount');
       return;
     }
 
-    if (!this.selectedBranch || this.selectedBranch === 'ALL') {
-      alert('Please select branch');
+    if (!this.selectedBranch) {
+      this.showToast('error', '✗ Please select branch');
       return;
     }
 
@@ -184,9 +263,9 @@ customer: any = null;
       paymentMode: this.paymentMode,
       description: this.description,
       billno: this.billno || null,
-      returnDate: this.date,
+      returnDate: this.returnDate || null,  // Optional - user selected
       hotelBranchName: this.selectedBranch,
-      updatedAt: new Date().toISOString() // ✅ include updatedAt
+      updatedAt: this.transactionDate ? new Date(this.transactionDate).toISOString() : new Date().toISOString()  // Transaction Date selected by user
     };
 
     if (this.type === 'give') {
@@ -207,15 +286,75 @@ customer: any = null;
       next: () => {
         this.getTransactionRecord();
         this.closePopup();
+        this.showToast('success', '✓ Transaction Added Successfully!');
       },
       error: (err) => {
         console.error(err);
-        alert(err.error?.message || 'Transaction failed');
+        this.showToast('error', err.error?.message || '✗ Transaction Failed');
       }
     });
   }
 
-  // ================= IMAGE =================
+  deleteTransaction(t: any) {
+    if (!t || !t._id) {
+      this.showToast('error', '✗ Transaction ID missing');
+      return;
+    }
+
+    // Show delete confirmation modal
+    this.transactionToDelete = t;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete() {
+    if (!this.transactionToDelete) return;
+
+    const payload = {
+      transectionUserId: this.id,
+      type: this.transactionToDelete.type === 'give' ? 'givenToAdmin' : 'takenFromAdmin',
+      objId: this.transactionToDelete._id
+    };
+
+    console.log('DELETE PAYLOAD 👉', payload);
+
+    this.http.delete(
+      'http://localhost:5000/api/admin/delete/transection-user-entry',
+      {
+        ...this.getHeaders(),
+        body: payload
+      }
+    ).subscribe({
+      next: (res: any) => {
+        this.getTransactionRecord();
+        this.closeDeleteModal();
+        this.showToast('success', '✓ Transaction Deleted Successfully!');
+      },
+      error: (err) => {
+        console.error(err);
+        this.closeDeleteModal();
+        this.showToast('error', err.error?.message || '✗ Delete Failed');
+      }
+    });
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.transactionToDelete = null;
+  }
+
+  /* ================= TOAST ================= */
+  showToast(type: 'success' | 'error' | 'info', message: string) {
+    this.toast.type = type;
+    this.toast.message = message;
+    this.toast.show = true;
+
+    setTimeout(() => {
+      this.toast.show = false;
+    }, 1000); // ✅ 1 second timing
+  }
+
+
+  /* ================= IMAGE ================= */
   openImage(url: string) {
     window.open(url, '_blank');
   }

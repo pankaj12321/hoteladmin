@@ -24,6 +24,30 @@
       </select>
     </div>
   </div>
+  <!-- 🔥 NEW BRANCH FILTER -->
+  <div class="branch-filter">
+    <div class="filter">
+      <label>Branch:</label>
+      <select [(ngModel)]="branchFilter" (change)="applyBranchFilter()">
+        <option value="">All Branch</option>
+        <option *ngFor="let b of branches" [value]="b">
+          {{ b }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label>Entry From Date:</label>
+      <input type="date" [(ngModel)]="entryFromDate" (change)="applyBranchFilter()" />
+    </div>
+
+    <div class="filter">
+      <label>Entry To Date:</label>
+      <input type="date" [(ngModel)]="entryToDate" (change)="applyBranchFilter()" />
+    </div>
+
+
+  </div>
 
   <div class="driver-table">
     <table>
@@ -36,6 +60,7 @@
           <!-- <th>Car Number</th> -->
           <th>Created Date</th>
           <th>Location</th>
+          <th>Branch Entries</th>
           <th>Total Entries</th>
           <th>Whatsapp</th>
           <th>Text</th>
@@ -50,6 +75,7 @@
           <!-- <td>{{ d.carNumber }}</td> -->
           <td>{{ d.createdAt | date: 'dd-MM-yyyy' }}</td>
           <td>{{ d.location || '—' }}</td>
+          <td>{{ d.branchEntryCount || 0 }}</td>
           <td>{{ d.totalEntries || 0 }}</td>
           <td>
             <button (click)="sendWhatsAppReminder(d)">

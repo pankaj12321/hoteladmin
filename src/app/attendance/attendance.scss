@@ -121,3 +121,102 @@
   }
 
 }
+
+.top-navigation {
+  display: flex;
+  justify-content: space-between;
+}
+
+.att-btn {
+  width: 160px;
+  height: 40px;
+  padding: 6px 14px;
+  border: none;
+  background: #580101;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.attendance {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+
+/* 🔥 Toast Notification Styles */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: -350px;
+  min-width: 300px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: right 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.3s ease;
+  z-index: 999999;
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Show Animation */
+.toast-notification.show {
+  right: 20px;
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Success Toast */
+.toast-notification.success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  border-left: 5px solid #0f876d;
+}
+
+/* Error Toast */
+.toast-notification.error {
+  background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  border-left: 5px solid #c92a2a;
+}
+
+/* Info Toast */
+.toast-notification.info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-left: 5px solid #5568d3;
+}
+
+.toast-icon {
+  font-size: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* Pulse animation for icon */
+.toast-notification.show .toast-icon {
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+}

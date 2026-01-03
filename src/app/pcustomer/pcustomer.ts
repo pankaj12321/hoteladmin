@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,110 +9,109 @@ import { Router } from '@angular/router';
 })
 export class Pcustomer implements OnInit {
 
-  customers: any[] = [];
-  filteredCustomers: any[] = [];
+  showModal = false; // modal control
+  isEditMode = false; // flag for edit mode
 
-  searchTerm: string = '';
-  showModal: boolean = false;
-
-  customer = {
+  customer: any = {
     name: '',
     mobile: '',
-    city: ''
+    city: '',
+    personalCustomerRecordTranId: '' // required for update
   };
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) { }
+  customers: any[] = [];
 
-  ngOnInit(): void {
-    this.getCustomers();
-  }
-  getCustomers(): void {
-    const token = localStorage.getItem('token');
+  constructor(private http: HttpClient, private router: Router) {}
 
-    const headers = {
-      Authorization: `Bearer ${token}`
-    };
-
-    this.http.get<any>(
-      'http://localhost:5000/api/admin/get/personal/customer/users',
-      { headers }
-    ).subscribe({
-      next: (res) => {
-        this.customers = res.data || [];
-        this.filteredCustomers = this.customers;
-      },
-      error: (err) => {
-        console.error('Get customers error:', err);
-      }
-    });
+  ngOnInit() {
+    this.getAllCustomers();
   }
 
-  searchCustomer(): void {
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredCustomers = this.customers.filter(c =>
-      (c.name || '').toLowerCase().includes(term) ||
-      (c.mobile || '').includes(term) ||
-      (c.city || '').toLowerCase().includes(term)
-    );
-  }
-
-  openModal(): void {
+  // 🔵 OPEN MODAL
+  openModal() {
     this.showModal = true;
   }
 
-  closeModal(): void {
+  // 🔵 CLOSE MODAL
+  closeModal() {
     this.showModal = false;
-    this.customer = {
-      name: '',
-      mobile: '',
-      city: ''
-    };
+    this.isEditMode = false;
+    this.customer = { name: '', mobile: '', city: '', personalCustomerRecordTranId: '' };
   }
 
-  addCustomer(): void {
+  // ✅ ADD CUSTOMER
+  addCustomer() {
     const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
 
-    if (!token) {
-      alert('Token missing, please login again');
+    this.http.post(
+      'http://localhost:5000/api/admin/add/personal/customer',
+      this.customer,
+      { headers }
+    ).subscribe({
+      next: () => {
+        alert('Customer Added Successfully');
+        this.closeModal();
+        this.getAllCustomers();
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  // ✅ GET ALL CUSTOMERS
+  getAllCustomers() {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    this.http.get(
+      'http://localhost:5000/api/admin/get/personal/customer/users',
+      { headers }
+    ).subscribe((res: any) => {
+      this.customers = res?.data || res;
+    });
+  }
+
+  // 🔹 OPEN PROFILE
+  openProfile(customer: any) {
+    const id = customer.personalCustomerRecordTranId;
+    this.router.navigate(['/home/pcprofile', id]);
+  }
+
+  // 🔹 EDIT CUSTOMER
+  editCustomer(customer: any) {
+    this.isEditMode = true;
+    this.showModal = true;
+    this.customer = { ...customer }; // copy data to modal
+  }
+
+  // 🔹 UPDATE CUSTOMER (PATCH)
+  updateCustomer() {
+    if (!this.customer.personalCustomerRecordTranId) {
+      alert('Customer ID missing!');
       return;
     }
 
-    const headers = {
-      Authorization: `Bearer ${token}`
-    };
-
     const payload = {
+      personalCustomerRecordTranId: this.customer.personalCustomerRecordTranId,
       name: this.customer.name,
       mobile: this.customer.mobile,
       city: this.customer.city
     };
 
-    this.http.post(
-      'http://localhost:5000/api/admin/add/personal/customer',
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    this.http.patch(
+      'http://localhost:5000/api/admin/update/personal/customer/profile',
       payload,
       { headers }
     ).subscribe({
       next: () => {
+        alert('Customer Updated Successfully');
         this.closeModal();
-        this.getCustomers();
+        this.getAllCustomers();
       },
-      error: (err) => {
-        console.error('Add customer error:', err);
-        alert(err.error?.message || 'Add failed');
-      }
+      error: err => console.error(err)
     });
   }
-openProfile(id: string): void {
-  this.router.navigate(['/home/pcprofile'], {
-    queryParams: {
-      personalCustomerRecordTranId: id
-    }
-  });
-}
-
-
 }

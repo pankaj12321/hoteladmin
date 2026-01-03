@@ -36,7 +36,7 @@
 }
 
 .payment-form h3 {
-  color:  #ff5623;
+  color: #ff5623;
   margin-bottom: 15px;
 }
 
@@ -72,7 +72,7 @@
 }
 
 .bottom-section h3 {
-  color:  #ff5623;
+  color: #ff5623;
   margin-bottom: 15px;
 }
 
@@ -111,6 +111,7 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
 .btn-green {
   background-color: #25d366;
   color: white;
@@ -123,6 +124,7 @@
 .btn-green:hover {
   background-color: #1ebd5a;
 }
+
 .toast-box {
   position: fixed;
   top: 20px;
@@ -135,7 +137,7 @@
   align-items: center;
   gap: 12px;
   font-weight: 600;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   transition: 0.35s ease;
   z-index: 999999;
   opacity: 0;
@@ -166,6 +168,7 @@
 .toast-message {
   font-size: 15px;
 }
+
 .filter-bar {
   display: flex;
   gap: 12px;
@@ -205,5 +208,78 @@
 
   .filter-bar select {
     width: 100%;
+  }
+}
+
+/* 🔥 Branch Statistics Cards */
+.branch-stats-container {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.branch-stats-container h3 {
+  color: #ff5623;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.stats-cards {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 10px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card.total {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.stat-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .stats-cards {
+    flex-direction: column;
+  }
+
+  .stat-card {
+    min-width: 100%;
   }
 }

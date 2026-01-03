@@ -1,28 +1,47 @@
+<div class="container">
 
-<div class="header">
-    <h2>📒 Personal Khatabook</h2>
-</div>
+    <div class="top-bar">
+        <div class="total-box">
+            Total Users: <b>{{ users.length }}</b>
+        </div>
 
-<div class="top-bar">
-    <input type="text" placeholder="Search by name or mobile..." [(ngModel)]="searchText" (input)="searchPeople()" />
-    <button (click)="showAddForm = true">+ Add Person</button>
-</div>
+        <div class="right-bar">
+            <input type="text" placeholder="Search by name or mobile" [(ngModel)]="searchTerm" (input)="searchUser()" />
 
-<div class="form-overlay" *ngIf="showAddForm">
-    <div class="add-form">
-        <h3>Add Person</h3>
-
-        <input type="text" placeholder="Name" [(ngModel)]="newPerson.name" />
-        <input type="text" placeholder="Mobile" [(ngModel)]="newPerson.mobile" />
-        <div class="form-actions">
-            <button class="save" (click)="addPerson()">Save</button>
-            <button class="cancel" (click)="showAddForm = false">Cancel</button>
+            <button (click)="openModal()">Add User</button>
         </div>
     </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>City</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let user of filteredUsers" (click)="openProfile(user)">
+                <td>{{ user.name }}</td>
+                <td>{{ user.mobile }}</td>
+                <td>{{ user.city }}</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
-<div class="grid">
-    <div class="card" *ngFor="let p of filteredList"   (click)="openProfile(p.personalTransectionalUserId)">
-        <h3>{{ p.name }}</h3>
-        <p>📞 {{ p.mobile }}</p>
+
+    <!-- MODAL -->
+    <div class="modal" *ngIf="showModal">
+        <div class="modal-content">
+            <h3>Add Khatabook User</h3>
+
+            <input type="text" placeholder="Name" [(ngModel)]="name" />
+            <input type="text" placeholder="Mobile" [(ngModel)]="mobile" />
+            <input type="text" placeholder="City" [(ngModel)]="city" />
+
+            <div class="modal-actions">
+                <button (click)="addUser()">Save</button>
+                <button class="cancel" (click)="closeModal()">Cancel</button>
+            </div>
+        </div>
     </div>
-</div>

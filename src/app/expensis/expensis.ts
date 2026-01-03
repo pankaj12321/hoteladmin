@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-
+import { HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-expensis',
@@ -25,6 +25,12 @@ export class Expensis {
 
   ngOnInit() {
     this.getCustomers();
+    const savedBranch = localStorage.getItem('branchName');
+    if (savedBranch) {
+      this.selectedBranch = savedBranch;
+      this.expenseForm.branch = savedBranch;
+      this.earningForm.branch = savedBranch;
+    }
   }
 
   openDiv(div: string) {
@@ -114,7 +120,7 @@ export class Expensis {
     billno: "",
     description: "",
     time: "",
-      branch: 'Gokulpura'
+    branch: 'Gokulpura'
   };
 
   earningForm = {
@@ -125,7 +131,7 @@ export class Expensis {
     time: "",
     billno: "",
     description: "",
-     branch: 'Gokulpura'
+    branch: 'Gokulpura'
   };
   selectedEarningImage: File | null = null;
   selectedExpenseImage: File | null = null;
@@ -138,34 +144,43 @@ export class Expensis {
     this.selectedExpenseImage = event.target.files[0];
   }
   branches = [
-  'Gokulpura',
-  'Sikar',
-  'Sawli'
-];
+    'Gokulpurabranch',
+    'Sikarbranch',
+    'Sawlibranch'
+  ];
 
-selectedBranch: string = 'Gokulpura';
-changeBranch(branch: string) {
-  this.selectedBranch = branch;
-  this.getHotelExpenseReport();
-}
+  selectedBranch: string = 'Gokulpura';
+  changeBranch(branch: string) {
+    this.selectedBranch = branch;
+    this.expenseForm.branch = branch;
+    this.earningForm.branch = branch;
+    this.getHotelExpenseReport(branch);
+  }
 
-getHotelExpenseReport() {
-  this.http.get(
-    `Http://localhost:5000/api/admin/get/earning-expense-report?hotelBranchName=${this.selectedBranch}`,
-    this.getHeaders()
-  ).subscribe({
-    next: (res: any) => {
-      const data = res.data || {};
-      this.hotelEarnings = data.earnings || [];
-      this.hotelExpenses = data.expenses || [];
-      this.totalMonthlyEarnings = Number(data.totalEarning) || 0;
-      this.totalMonthlyExpenses = Number(data.totalExpense) || 0;
+  getHotelExpenseReport(branch?: string) {
+    const b = branch || this.selectedBranch;
+    this.http.get(
+      `Http://localhost:5000/api/admin/get/earning-expense-report?hotelBranchName=${this.selectedBranch}`,
+      this.getHeaders()
+    ).subscribe({
+      next: (res: any) => {
+        const data = res.data || {};
+        this.hotelEarnings = (data.earnings || []).map((e: any) => ({
+          ...e,
+          _id: e._id
+        }));
 
-      // (optional)
-      // this.finalBalance = Number(data.profitOrLoss) || 0;
-    }
-  });
-}
+        this.hotelExpenses = (data.expenses || []).map((e: any) => ({
+          ...e,
+          _id: e._id
+        }));
+        this.hotelEarnings = data.earnings || [];
+        this.hotelExpenses = data.expenses || [];
+        this.totalMonthlyEarnings = Number(data.totalEarning) || 0;
+        this.totalMonthlyExpenses = Number(data.totalExpense) || 0;
+      }
+    });
+  }
 
   addExpense() {
     const formData = new FormData();
@@ -211,7 +226,7 @@ getHotelExpenseReport() {
     formData.append("time", this.earningForm.time);
     formData.append("hotelBranchName", this.earningForm.branch);
 
-     
+
 
     if (this.selectedEarningImage) {
       formData.append("paymentScreenshoot", this.selectedEarningImage);
@@ -316,5 +331,47 @@ getHotelExpenseReport() {
   }
   closeImageModal() {
     this.showImageModal = false;
+  }
+
+  deleteEarningExpense(e: any, type: 'earnings' | 'expenses') {
+
+    if (!e || !e._id) {
+      alert('Entry ID missing');
+      return;
+    }
+
+    const confirmDelete = confirm('Are you sure you want to delete this entry?');
+    if (!confirmDelete) return;
+
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    const payload = {
+      type: type,
+      objId: e._id
+    };
+
+    console.log('DELETE EARNING/EXPENSE 👉', payload);
+
+    this.http.request(
+      'DELETE',
+      'http://localhost:5000/api/admin/delete/earning-expense-entry',
+      {
+        body: payload,
+        headers
+      }
+    ).subscribe({
+      next: () => {
+        alert('Deleted successfully');
+        this.getHotelExpenseReport(); // 🔁 refresh
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err.error?.message || 'Delete failed');
+      }
+    });
   }
 }

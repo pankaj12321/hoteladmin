@@ -61,6 +61,19 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- ================= EXPENSE SECTION ================= -->
 <!-- Add Expensis -->
 <div *ngIf="activeDiv === 'expense'" class="content-box">
@@ -172,6 +185,10 @@
             <img *ngIf="e.paymentScreenshoot" [src]="e.paymentScreenshoot" class="thumb-img"
               (click)="openImage(e.paymentScreenshoot)">
           </div>
+          <button class="delete-btn" (click)="deleteEarningExpense(e, 'earnings')">
+            Delete
+          </button>
+
         </div>
       </div>
     </div>
@@ -195,6 +212,10 @@
             <img *ngIf="e.paymentScreenshoot" [src]="e.paymentScreenshoot" class="thumb-img"
               (click)="openImage(e.paymentScreenshoot)">
           </div>
+          <button class="delete-btn" (click)="deleteEarningExpense(e, 'expenses')">
+            Delete
+          </button>
+
         </div>
       </div>
 

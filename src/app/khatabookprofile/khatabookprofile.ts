@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -8,117 +8,210 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   styleUrls: ['./khatabookprofile.scss']
 })
 export class Khatabookprofile {
-   personalId!: string;
+  totalTaken = 0;
+  totalGiven = 0;
+  finalBalance = 0;
 
-  showForm: boolean = false;
-  formType: 'taken' | 'given' = 'taken'; // which form is open
+  showModal = false;
+  transactionType: 'taken' | 'given' = 'taken';
 
-  transaction: any = {
-    taken: { amount:'', paymentMode:'', billno:'', returnDate:'', description:'' },
-    given: { amount:'', paymentMode:'', billno:'', returnDate:'', description:'' }
+  branchName = ''; // Selected branch
+  branchList = ['Gokulpurabranch', 'Sikarbranch', 'Sanwalibranch']; // All available branches
+
+  transactions: any[] = [];
+  takenList: any[] = [];
+  givenList: any[] = [];
+
+  transactionForm: any = {
+    Rs: '',
+    returnDate: '',
+    description: '',
+    paymentMode: 'cash',
+    billno: '',
+    hotelBranchName: ''
   };
 
-  selectedFile: File | null = null;
+  userId: string | null = '';
+  userProfile: any = null;
+  isLoading = false;
+  errorMessage = '';
 
-  // Transaction history arrays
-  takenFromAdmin: any[] = [];
-  givenToAdmin: any[] = [];
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient
+  ) { }
 
-  // Totals
-  totalTaken: number = 0;
-  totalGiven: number = 0;
-  balance: number = 0;
+  ngOnInit() {
+    this.userId = this.route.snapshot.paramMap.get('id');
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {}
-
-  ngOnInit(): void {
-    this.personalId = this.route.snapshot.paramMap.get('id')!;
-    this.loadTransactions();
-  }
-
-  getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
-  /** OPEN FORM */
-  openForm(type: 'taken' | 'given') {
-    this.formType = type;
-    this.showForm = true;
-  }
-
-  /** CLOSE FORM */
-  closeForm() {
-    this.showForm = false;
-    this.selectedFile = null;
-  }
-
-  /** FILE SELECT */
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-  }
-
-  /** ADD TRANSACTION */
-  makeTransaction() {
-    if (!this.personalId) return alert("Personal ID missing");
-
-    const formData = new FormData();
-    formData.append('personalTransectionalUserId', this.personalId);
-
-    const dataKey = this.formType === 'taken' ? 'takenFromAdmin' : 'givenToAdmin';
-    const data = this.transaction[this.formType];
-
-    formData.append(`${dataKey}[Rs]`, data.amount);
-    formData.append(`${dataKey}[paymentMode]`, data.paymentMode);
-    formData.append(`${dataKey}[billno]`, data.billno);
-    formData.append(`${dataKey}[returnDate]`, data.returnDate);
-    formData.append(`${dataKey}[description]`, data.description);
-
-    if (this.selectedFile) {
-      formData.append('paymentScreenshoot', this.selectedFile);
+    const adminRaw = localStorage.getItem('admin');
+    if (adminRaw) {
+      const admin = JSON.parse(adminRaw);
+      // Login branch default
+      this.branchName = admin.user?.HBranchName || admin.HBranchName || '';
     }
 
-    this.http.post('Http://localhost:5000/api/admin/make/personal/user/transection', formData, { headers: this.getHeaders() })
-      .subscribe({
-        next: () => {
-          alert('Transaction added successfully!');
-          this.transaction[this.formType] = { amount:'', paymentMode:'', billno:'', returnDate:'', description:'' };
-          this.selectedFile = null;
-          this.showForm = false;
-          this.loadTransactions(); // refresh history
-        },
-        error: (err) => {
-          console.error('Transaction Error', err);
-          alert('Failed to add transaction');
-        }
-      });
+    if (this.userId) {
+      this.getUserProfile();
+      this.getTransactions();
+    }
   }
 
-  /** LOAD TRANSACTION HISTORY */
- loadTransactions() {
-  if (!this.personalId) return;
+  getUserProfile() {
+    this.isLoading = true;
+    this.errorMessage = '';
 
-  const url = `Http://localhost:5000/api/admin/get/personal/transectional/record?personalTransectionalUserId=${this.personalId}`;
-  this.http.get<any>(url, { headers: this.getHeaders() })
-    .subscribe({
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const apiUrl = 'http://localhost:5000/api/admin/get/khatabook/users';
+    this.http.get<any>(apiUrl, { headers }).subscribe({
       next: (res) => {
-        const data = res.data;
-        this.takenFromAdmin = data?.takenFromAdmin || [];
-        this.givenToAdmin = data?.givenToAdmin || [];
-
-        // calculate totals
-        this.totalTaken = this.takenFromAdmin.reduce((sum, t) => sum + Number(t.Rs), 0);
-        this.totalGiven = this.givenToAdmin.reduce((sum, t) => sum + Number(t.Rs), 0);
-        this.balance = this.totalTaken - this.totalGiven;
-
+        const allUsers = res.data || res;
+        this.userProfile = allUsers.find((user: any) => user.khatabookUserId === this.userId);
+        if (!this.userProfile) this.errorMessage = `User with ID ${this.userId} not found`;
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Transaction fetch error', err);
+        this.errorMessage = err.error?.message || 'Failed to load user profile';
+        this.isLoading = false;
       }
     });
+  }
+
+  goBack() {
+    this.router.navigate(['/home/khatabook']);
+  }
+
+  openTransactionModal(type: 'taken' | 'given') {
+    this.transactionType = type;
+    this.showModal = true;
+
+    this.transactionForm = {
+      Rs: '',
+      returnDate: new Date().toISOString().substring(0, 10),
+      description: '',
+      paymentMode: 'cash',
+      billno: '',
+      hotelBranchName: this.branchName // Default branch
+    };
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  submitTransaction() {
+    if (!this.transactionForm.hotelBranchName) {
+      alert('Please select branch');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const formData = new FormData();
+    formData.append('khatabookUserId', this.userId!);
+
+    const payload = {
+      Rs: this.transactionForm.Rs,
+      returnDate: this.transactionForm.returnDate,
+      description: this.transactionForm.description,
+      paymentMode: this.transactionForm.paymentMode,
+      billno: this.transactionForm.billno,
+      hotelBranchName: this.transactionForm.hotelBranchName
+    };
+
+    if (this.transactionType === 'taken') {
+      formData.append('takenFromAdmin', JSON.stringify(payload));
+    } else {
+      formData.append('givenToAdmin', JSON.stringify(payload));
+    }
+
+    this.http.post(
+      'http://localhost:5000/api/admin/add/khatabook/transection',
+      formData,
+      { headers }
+    ).subscribe({
+      next: () => {
+        this.closeModal();
+        this.getTransactions();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+ getTransactions() {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  this.http.get<any>(
+    'http://localhost:5000/api/admin/get/khatabook/transection',
+    { headers }
+  ).subscribe({
+    next: (res) => {
+      const record = res.data?.find(
+        (r: any) => r.khatabookUserId === this.userId
+      );
+
+      this.takenList = record?.takenFromAdmin || [];
+      this.givenList = record?.givenToAdmin || [];
+
+      // 🔥 TOTAL CALCULATION
+      this.totalTaken = this.takenList.reduce(
+        (sum: number, t: any) => sum + Number(t.Rs || 0), 0
+      );
+
+      this.totalGiven = this.givenList.reduce(
+        (sum: number, g: any) => sum + Number(g.Rs || 0), 0
+      );
+
+      this.finalBalance = this.totalTaken - this.totalGiven;
+    },
+    error: (err) => {
+      console.error(err);
+    }
+  });
 }
 
+  deleteTransaction(type: 'taken' | 'given', objId: string) {
+    if (!confirm('Are you sure you want to delete this transaction?')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const payload = {
+      khatabookUserId: this.userId!,
+      objId,
+      type: type === 'taken' ? 'takenFromAdmin' : 'givenToAdmin'
+    };
+
+    this.http.delete(
+      'http://localhost:5000/api/admin/delete/khatabook/transection-entry',
+      { headers, body: payload }
+    ).subscribe({
+      next: (res) => {
+        alert('Transaction deleted successfully');
+        this.getTransactions(); // Refresh the list
+      },
+      error: (err) => {
+        console.error('Delete transaction error:', err);
+        alert('Failed to delete transaction');
+      }
+    });
+  }
 
 }

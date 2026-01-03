@@ -1,74 +1,104 @@
-<div class="header">
-  <h2>📒 Khatabook Profile</h2>
+<div class="profile-container">
+   <div class="header">
+      <button class="back-btn" (click)="goBack()">← Back to Users</button>
+      <h2>Khatabook User Profile</h2>
+   </div>
+
+   <div *ngIf="isLoading" class="loading">
+      <p>Loading user profile...</p>
+   </div>
+
+   <div *ngIf="errorMessage && !isLoading" class="error">
+      <p>{{ errorMessage }}</p>
+      <button (click)="goBack()">Return to Users List</button>
+   </div>
+
+   <div *ngIf="userProfile && !isLoading" class="profile-details">
+      <div class="field">
+         <label>Khatabook User ID:</label>
+         <span>{{ userProfile.khatabookUserId || userId }}</span>
+      </div>
+      <div class="field">
+         <label>Name:</label>
+         <span>{{ userProfile.name }}</span>
+      </div>
+      <div class="field">
+         <label>Mobile:</label>
+         <span>{{ userProfile.mobile }}</span>
+      </div>
+      <div class="field">
+         <label>City:</label>
+         <span>{{ userProfile.city }}</span>
+      </div>
+   </div>
 </div>
-<div class="summary-container">
-  <div class="summary-box green">
+<div class="summary-boxes">
+  <div class="summary taken">
     <h4>Total Taken</h4>
-    <p>Rs {{ totalTaken }}</p>
+    <p>₹ {{ totalTaken }}</p>
   </div>
-  <div class="summary-box red">
+
+  <div class="summary given">
     <h4>Total Given</h4>
-    <p>Rs {{ totalGiven }}</p>
+    <p>₹ {{ totalGiven }}</p>
   </div>
-  <div class="summary-box blue">
-    <h4>Balance</h4>
-    <p>Rs {{ balance }}</p>
-  </div>
-</div>
 
-
-<!-- BUTTONS -->
-<div class="button-group">
-  <button class="green-btn" (click)="openForm('taken')">Taken From Admin</button>
-  <button class="red-btn" (click)="openForm('given')">Given To Admin</button>
-</div>
-
-<!-- TRANSACTION FORM -->
-<div class="form-overlay" *ngIf="showForm">
-  <div class="transaction-form">
-    <h3>{{ formType === 'taken' ? 'Taken From Admin' : 'Given To Admin' }}</h3>
-
-    <input type="number" placeholder="Amount (Rs)" [(ngModel)]="transaction[formType].amount">
-    <input type="text" placeholder="Payment Mode" [(ngModel)]="transaction[formType].paymentMode">
-    <input type="text" placeholder="Bill No" [(ngModel)]="transaction[formType].billno">
-    <input type="date" placeholder="Return Date" [(ngModel)]="transaction[formType].returnDate">
-    <textarea placeholder="Description" [(ngModel)]="transaction[formType].description"></textarea>
-
-    <input type="file" (change)="onFileSelected($event)">
-
-    <div class="form-actions">
-      <button class="save" (click)="makeTransaction()">Submit</button>
-      <button class="cancel" (click)="closeForm()">Cancel</button>
-    </div>
+  <div class="summary balance">
+    <h4>Final Balance</h4>
+    <p>₹ {{ finalBalance }}</p>
   </div>
 </div>
-<div class="transaction-history-container">
 
-  <div class="transaction-column">
-    <h3>🟢 Taken From Admin</h3>
-    <div *ngIf="takenFromAdmin.length === 0">No transactions found</div>
-    <div class="transaction-card" *ngFor="let t of takenFromAdmin">
-      <p><b>Amount:</b> Rs {{ t.Rs }}</p>
-      <p><b>Payment Mode:</b> {{ t.paymentMode }}</p>
-      <p><b>Bill No:</b> {{ t.billno }}</p>
-      <p><b>Return Date:</b> {{ t.returnDate | date }}</p>
-      <p><b>Description:</b> {{ t.description }}</p>
-      <p *ngIf="t.paymentScreenshoot"><b>Screenshot:</b> <a [href]="t.paymentScreenshoot" target="_blank">View</a></p>
-    </div>
-  </div>
+<div class="action-buttons">
+   <button class="btn taken" (click)="openTransactionModal('taken')">Taken From Admin</button>
+   <button class="btn given" (click)="openTransactionModal('given')">Given To Admin</button>
+</div>
 
-  <div class="transaction-column">
-    <h3>🔴 Given To Admin</h3>
-    <div *ngIf="givenToAdmin.length === 0">No transactions found</div>
-    <div class="transaction-card red" *ngFor="let t of givenToAdmin">
-      <p><b>Amount:</b> Rs {{ t.Rs }}</p>
-      <p><b>Payment Mode:</b> {{ t.paymentMode }}</p>
-      <p><b>Bill No:</b> {{ t.billno }}</p>
-      <p><b>Return Date:</b> {{ t.returnDate | date }}</p>
-      <p><b>Description:</b> {{ t.description }}</p>
-      <p *ngIf="t.paymentScreenshoot"><b>Screenshot:</b> <a [href]="t.paymentScreenshoot" target="_blank">View</a></p>
+<div class="modal" *ngIf="showModal">
+   <div class="modal-content">
+      <h3>{{ transactionType === 'taken' ? 'Taken From Admin' : 'Given To Admin' }}</h3>
+
+      <input type="number" placeholder="Amount" [(ngModel)]="transactionForm.Rs">
+      <input type="date" [(ngModel)]="transactionForm.returnDate">
+      <input type="text" placeholder="Description" [(ngModel)]="transactionForm.description">
+      <input type="number" placeholder="Bill No" [(ngModel)]="transactionForm.billno">
+
+      <!-- Branch select dropdown -->
+      <label>Branch:</label>
+      <select [(ngModel)]="transactionForm.hotelBranchName">
+         <option *ngFor="let b of branchList" [value]="b">{{ b }}</option>
+      </select>
+
+      <button (click)="submitTransaction()">Save</button>
+      <button (click)="closeModal()">Cancel</button>
+   </div>
+</div>
+
+<div class="transactions">
+  <div class="left">
+    <h3>Taken From Admin</h3>
+    <div *ngIf="takenList.length === 0">No record</div>
+    <div *ngFor="let t of takenList" class="txn">
+      <p>₹ {{ t.Rs }}</p>
+      <p>{{ t.description }}</p>
+      <p>{{ t.paymentMode }}</p>
+      <p>{{ t.returnDate | date }}</p>
+      <small>{{ t.hotelBranchName }}</small>
+       <span class="delete-btn" (click)="deleteTransaction('taken', t._id)">🗑️ Delete</span>
     </div>
   </div>
 
+  <div class="right">
+    <h3>Given To Admin</h3>
+    <div *ngIf="givenList.length === 0">No record</div>
+    <div *ngFor="let g of givenList" class="txn">
+      <p>₹ {{ g.Rs }}</p>
+      <p>{{ g.description }}</p>
+      <p>{{ g.paymentMode }}</p>
+      <p>{{ g.returnDate | date }}</p>
+      <small>{{ g.hotelBranchName }}</small>
+        <span class="delete-btn" (click)="deleteTransaction('given', g._id)">🗑️ Delete</span>
+    </div>
+  </div>
 </div>
-
+   

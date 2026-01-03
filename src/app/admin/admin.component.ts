@@ -43,6 +43,13 @@ export class AdminComponent {
     salary: '',
   };
 
+  // 🔥 Toast Notification
+  toast = {
+    show: false,
+    message: '',
+    type: '' as 'success' | 'error' | 'info'
+  };
+
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit() {
@@ -79,20 +86,20 @@ export class AdminComponent {
     });
   }
 
-searchStaff() {
-  const s = this.searchTerm.toLowerCase();
+  searchStaff() {
+    const s = this.searchTerm.toLowerCase();
 
-  this.filteredStaff = this.staffList.filter(x => {
-    const matchSearch =
-      x.firstName.toLowerCase().includes(s) ||
-      x.mobile.includes(s);
+    this.filteredStaff = this.staffList.filter(x => {
+      const matchSearch =
+        x.firstName.toLowerCase().includes(s) ||
+        x.mobile.includes(s);
 
-    const matchBranch =
-      !this.selectedBranch || x.branchName === this.selectedBranch;
+      const matchBranch =
+        !this.selectedBranch || x.branchName === this.selectedBranch;
 
-    return matchSearch && matchBranch;
-  });
-}
+      return matchSearch && matchBranch;
+    });
+  }
 
 
   // ================= MODAL =================
@@ -178,14 +185,20 @@ searchStaff() {
       'http://localhost:5000/api/admin/staff/add',
       fd,
       { headers }
-    ).subscribe(() => {
-      this.getStaffList();
-      this.closeModal();
+    ).subscribe({
+      next: () => {
+        this.getStaffList();
+        this.closeModal();
+        this.showToast('success', '✓ Staff Added Successfully!');
+      },
+      error: () => {
+        this.showToast('error', '✗ Failed to Add Staff');
+      }
     });
   }
 
   updateStaff() {
-     console.log(' Update Staff Clicked');
+    console.log(' Update Staff Clicked');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
@@ -208,12 +221,28 @@ searchStaff() {
       'http://localhost:5000/api/admin/staff/update-profile',
       fd,
       { headers }
-    ).subscribe(() => {
-      console.log("Done");
-
-      this.getStaffList();
-      this.closeModal();
+    ).subscribe({
+      next: () => {
+        console.log("Done");
+        this.getStaffList();
+        this.closeModal();
+        this.showToast('success', '✓ Staff Updated Successfully!');
+      },
+      error: () => {
+        this.showToast('error', '✗ Failed to Update Staff');
+      }
     });
+  }
+
+  // 🔥 Show Toast Notification
+  showToast(type: 'success' | 'error' | 'info', message: string) {
+    this.toast.type = type;
+    this.toast.message = message;
+    this.toast.show = true;
+
+    setTimeout(() => {
+      this.toast.show = false;
+    }, 1000); // ✅ 1 second timing
   }
 
   resetForm() {
@@ -239,17 +268,17 @@ searchStaff() {
     this.router.navigate(['/home/staff', id]);
   }
   filterByBranch(branch: string) {
-  this.selectedBranch = branch;
+    this.selectedBranch = branch;
 
-  if (!branch) {
-    // 🔹 Total Staff
-    this.filteredStaff = [...this.staffList];
-    return;
+    if (!branch) {
+      // 🔹 Total Staff
+      this.filteredStaff = [...this.staffList];
+      return;
+    }
+
+    this.filteredStaff = this.staffList.filter(
+      s => s.branchName === branch
+    );
   }
-
-  this.filteredStaff = this.staffList.filter(
-    s => s.branchName === branch
-  );
-}
 
 }

@@ -17,6 +17,13 @@ export class AllDriver {
   searchTerm: string = '';
 
   entryRanges = ['5-10', '10-15', '15-20', '20-25', '25-30', '30-40'];
+  branchFilter: string = '';
+  entryFromDate: string = '';
+  entryToDate: string = '';
+
+  branches = ['Gokulpurabranch', 'Sikarbranch', 'Sanwalibranch'];
+
+  allEntries: any[] = [];
 
   reminderMessage: string =
     'नमस्ते, {name} जी आपका सहयोग हमारे लिए हमेशा मूल्यवान रहा है जब भी आप किसी पार्टी के साथ इस ओर आएं BL Poonam Hotel & Restaurant में रुकने का अवसर ज़रूर दें आपकी हर यात्रा सुखद और सफल रहे यही हमारी शुभकामनाएँ हैं (टीम BL Poonam Hotel & Restaurant)';
@@ -25,6 +32,7 @@ export class AllDriver {
 
   ngOnInit(): void {
     this.getDrivers();
+    this.getAllCommissionEntries(); // ✅ Fetch all entries once
   }
 
   getToken(): string | null {
@@ -51,9 +59,16 @@ export class AllDriver {
           this.drivers = list.map((d: any) => ({
             ...d,
             name: d.name,
+            entries: [], // ✅ Initialize empty entries array
+            totalEntries: 0,
+            branchEntryCount: 0
           }));
           this.filteredDrivers = this.drivers;
-          this.drivers.forEach((driver) => this.getDriverEntries(driver));
+
+          // ✅ If entries are already loaded, calculate immediately
+          if (this.allEntries.length > 0) {
+            this.calculateDriverEntries();
+          }
         },
         error: (err) => console.error(err),
       });
@@ -141,4 +156,73 @@ export class AllDriver {
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   }
+  getAllCommissionEntries() {
+    this.http
+      .get<any>('http://localhost:5000/api/admin/get-driver-commision-entries', {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (res) => {
+          this.allEntries = res.entries || [];
+          this.calculateDriverEntries();
+        },
+        error: (err) => console.error(err),
+      });
+  }
+
+  calculateDriverEntries() {
+    this.drivers.forEach((driver) => {
+      const entries = this.allEntries.filter(
+        (e) => e.driverId === driver._id
+      );
+
+      driver.totalEntries = entries.length;
+      driver.entries = entries; // ✅ Store all entries for this driver
+    });
+
+    this.applyBranchFilter(); // ✅ Apply filter after calculating
+  }
+
+  applyBranchFilter() {
+    this.filteredDrivers = this.drivers
+      .map((driver) => {
+        // Create a copy to avoid mutating original
+        const driverCopy = { ...driver };
+        let entries = [...(driver.entries || [])];
+
+        // ✅ Branch filter
+        if (this.branchFilter) {
+          entries = entries.filter(
+            (e: any) => e.branchName === this.branchFilter
+          );
+        }
+
+        // ✅ Date filter (ONLY if both dates selected)
+        if (this.entryFromDate && this.entryToDate) {
+          const from = new Date(this.entryFromDate);
+          const to = new Date(this.entryToDate);
+          to.setHours(23, 59, 59, 999); // full day include
+
+          entries = entries.filter((e: any) => {
+            const d = new Date(e.entryDate);
+            return d >= from && d <= to;
+          });
+        }
+
+        // ✅ Set branch-specific entry count
+        driverCopy.branchEntryCount = entries.length;
+
+        return driverCopy;
+      })
+      .filter((driver) => {
+        // ✅ Show driver if:
+        // 1. No filters applied (show all)
+        // 2. Or has entries matching the filter
+        const hasFilters = this.branchFilter || (this.entryFromDate && this.entryToDate);
+        return !hasFilters || driver.branchEntryCount > 0;
+      });
+  }
+
+
+
 }

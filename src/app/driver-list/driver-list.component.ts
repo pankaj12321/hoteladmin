@@ -83,16 +83,18 @@ export class DriverListComponent implements OnInit {
 
 
   openModal() {
-    this.showModal = true;
-    if (this.drivers.length > 0) {
-      const maxSr = Math.max(
-        ...this.drivers.map(d => parseInt(d.srNumber.replace("SR", "")) || 0)
-      );
-      this.newDriver.srNumber = "SR" + (maxSr + 1).toString().padStart(3, '0');
-    } else {
-      this.newDriver.srNumber = "SR001";
-    }
+  this.showModal = true;
+
+  if (this.drivers.length > 0) {
+    const maxSr = Math.max(
+      ...this.drivers.map(d => Number(d.srNumber) || 0)
+    );
+    this.newDriver.srNumber = maxSr + 1;
+  } else {
+    this.newDriver.srNumber = 1;
   }
+}
+
 
   closeModal() {
     this.showModal = false;

@@ -101,4 +101,14 @@
       </div>
     </div>
   </div>
+
+  <!-- 🔥 Toast Notification -->
+  <div class="toast-notification" [class.show]="toast.show" [ngClass]="toast.type">
+    <div class="toast-icon">
+      <span *ngIf="toast.type === 'success'">✓</span>
+      <span *ngIf="toast.type === 'error'">✗</span>
+      <span *ngIf="toast.type === 'info'">ℹ</span>
+    </div>
+    <div class="toast-message">{{ toast.message }}</div>
+  </div>
 </div>

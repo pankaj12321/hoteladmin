@@ -20,9 +20,15 @@ export class Sprofile {
 
   years: number[] = [];
 
+  /* ================= DELETE MODAL ================= */
+  showDeleteModal = false;
+  deleteTarget: any = null;
+  deleteType: 'takenFromAdmin' | 'givenToAdmin' | null = null;
+
   /* ================= BASIC ================= */
   supplierId = '';
   supplierData: any = null;
+  branches: string[] = [];
 
   showForm = false;
   formType = '';
@@ -82,7 +88,7 @@ export class Sprofile {
       this.transaction.updatedAt = new Date().toISOString().split('T')[0];
     }
   }
-  
+
 
   onFileSelect(event: any) {
     this.selectedImage = event.target.files[0];
@@ -156,37 +162,45 @@ export class Sprofile {
     ).subscribe((res: any) => {
       const data = res.data;
 
-      this.allTakenList = data.takenFromAdmin
-        .map((t: any) => ({
-          Rs: t.Rs,
-          paymentMode: t.paymentMode,
-          discription: t.description || '-',
-          billno: t.billno || null,
-          hotelBranchName: t.hotelBranchName || '-',
-          entryDate: t.updatedAt,
-          returnDate: t.returnDate || null,
-          image: t.paymentScreenshoot
-        }))
-        .sort((a: any, b: any) =>
-          new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime()
-        );
+      this.allTakenList = data.takenFromAdmin.map((t: any) => ({
+        _id: t._id,
+        Rs: t.Rs,
+        paymentMode: t.paymentMode,
+        discription: t.description || '-',
+        billno: t.billno || null,
+        hotelBranchName: t.hotelBranchName || '',
+        entryDate: t.updatedAt,
+        returnDate: t.returnDate || null,
+        image: t.paymentScreenshoot
+      }));
 
-      this.allGivenList = data.givenToAdmin
-        .map((t: any) => ({
-          Rs: t.Rs,
-          paymentMode: t.paymentMode,
-          discription: t.description || '-',
-          billno: t.billno || null,
-          hotelBranchName: t.hotelBranchName || '-',
-          entryDate: t.updatedAt,
-          returnDate: t.returnDate || null,
-          image: t.paymentScreenshoot
-        }))
-        .sort((a: any, b: any) =>
-          new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime()
-        );
+      this.allGivenList = data.givenToAdmin.map((t: any) => ({
+        _id: t._id,
+        Rs: t.Rs,
+        paymentMode: t.paymentMode,
+        discription: t.description || '-',
+        billno: t.billno || null,
+        hotelBranchName: t.hotelBranchName || '',
+        entryDate: t.updatedAt,
+        returnDate: t.returnDate || null,
+        image: t.paymentScreenshoot
+      }));
 
+      // ✅ SORT BY LATEST FIRST (descending order)
+      this.sortByLatest(this.allTakenList);
+      this.sortByLatest(this.allGivenList);
+
+      // ✅ UNIQUE BRANCH LIST
+      const allBranches = [
+        ...this.allTakenList.map(t => t.hotelBranchName),
+        ...this.allGivenList.map(t => t.hotelBranchName)
+      ];
+
+      this.branches = Array.from(new Set(allBranches)).filter(b => b);
+
+      // ✅ EXTRACT YEARS FOR FILTER DROPDOWN
       this.extractYears();
+
       this.applyAllFilters();
     });
   }
@@ -223,11 +237,6 @@ export class Sprofile {
       given = given.filter(t => new Date(t.entryDate).getFullYear() === this.selectedYear);
     }
 
-    if (this.selectedYear !== '') {
-      taken = taken.filter(t => new Date(t.entryDate).getFullYear() === this.selectedYear);
-      given = given.filter(t => new Date(t.entryDate).getFullYear() === this.selectedYear);
-    }
-
     this.takenList = taken;
     this.givenList = given;
 
@@ -250,4 +259,86 @@ export class Sprofile {
     this.applyAllFilters();
   }
 
+  /* ================= FILTER HANDLERS ================= */
+  onMonthChange() {
+    this.applyAllFilters();
+  }
+
+  onYearChange() {
+    this.applyAllFilters();
+  }
+
+  /* ================= SORTING HELPER ================= */
+  /**
+   * Sorts transaction array by entryDate (updatedAt) in descending order
+   * Latest transactions appear first
+   */
+  sortByLatest(list: any[]) {
+    list.sort((a, b) => {
+      const dateA = new Date(a.entryDate).getTime();
+      const dateB = new Date(b.entryDate).getTime();
+      return dateB - dateA; // Descending order (latest first)
+    });
+  }
+
+  /* ================= DELETE MODAL METHODS ================= */
+  /**
+   * Opens delete confirmation modal
+   */
+  confirmDelete(transaction: any, type: 'takenFromAdmin' | 'givenToAdmin') {
+    if (!transaction || !transaction._id) {
+      alert('Transaction ID missing');
+      return;
+    }
+    this.deleteTarget = transaction;
+    this.deleteType = type;
+    this.showDeleteModal = true;
+  }
+
+  /**
+   * Executes the delete API call
+   */
+  executeDelete() {
+    if (!this.deleteTarget || !this.deleteType) return;
+
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    const payload = {
+      supplierId: this.supplierId,
+      type: this.deleteType,
+      objId: this.deleteTarget._id
+    };
+
+    this.http.request(
+      'DELETE',
+      'http://localhost:5000/api/admin/delete/supplier-transection-entry',
+      {
+        body: payload,
+        headers
+      }
+    ).subscribe({
+      next: () => {
+        this.cancelDelete();
+        this.getTransactions(); // Refresh list
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err.error?.message || 'Delete failed');
+        this.cancelDelete();
+      }
+    });
+  }
+
+  /**
+   * Closes delete modal and resets state
+   */
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.deleteTarget = null;
+    this.deleteType = null;
+  }
 }
