@@ -29,6 +29,29 @@ export class Staffprofile {
   totalHalfDay = 0;
   totalPaidLeave = 0;
 
+  // 📕 Khatabook related
+  khatabookData: any = null;
+
+  showTransactionModal: boolean = false;
+  transactionType: 'given' | 'taken' = 'given';
+  transactionForm: {
+    Rs: number;
+    paymentMode: string;
+    description: string;
+    hotelBranchName: string;
+    billno: string | number | null;
+    returnDate: string | null;
+  } = {
+      Rs: 0,
+      paymentMode: 'cash',
+      description: '',
+      hotelBranchName: '',
+      billno: null,
+      returnDate: null
+    };
+  selectedFile: File | null = null;
+
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient
@@ -44,30 +67,28 @@ export class Staffprofile {
     if (this.staffId) {
       this.getStaffDetail();
       this.getStaffAttendance();
+      this.getStaffKhatabook();
     }
   }
-getStaffDetail() {
-  const token = localStorage.getItem('token');
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${token}`
-  });
+  getStaffDetail() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
 
-  this.http.get<any>(
-    `http://localhost:5000/api/admin/staff/get-list?staffId=${this.staffId}`,
-    { headers }
-  ).subscribe({
-    next: (res) => {
-      this.staffData = res.staffList?.length ? res.staffList[0] : null;
-      this.loading = false;
-
-      // ✅ staff milne ke baad attendance call karo
-      this.getStaffAttendance();
-    },
-    error: () => {
-      this.loading = false;
-    }
-  });
-}
+    this.http.get<any>(
+      `http://localhost:5000/api/admin/staff/get-list?staffId=${this.staffId}`,
+      { headers }
+    ).subscribe({
+      next: (res) => {
+        this.staffData = res.staffList?.length ? res.staffList[0] : null;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
 
 
   getStaffAttendance() {
@@ -77,50 +98,136 @@ getStaffDetail() {
     });
 
     const url =
-      'Http://localhost:5000/api/admin/attendance/get/staff-att' +
+      'http://localhost:5000/api/admin/attendance/get/staff-att' +
       `?month=${this.selectedMonth}&year=${this.selectedYear}`;
 
     this.http.get<any>(url, { headers }).subscribe({
-  next: (res) => {
-    if (!res?.data || !Array.isArray(res.data)) return;
+      next: (res) => {
+        if (!res?.data || !Array.isArray(res.data)) return;
 
-    const staff = res.data.find(
-      (s: any) => s.staffId === this.staffId
-    );
+        const staff = res.data.find(
+          (s: any) => s.staffId === this.staffId
+        );
 
-    if (!staff || !staff.attendance) return;
+        if (!staff || !staff.attendance) return;
 
-    this.attendanceDays = [];
-    this.resetTotals();
+        this.attendanceDays = [];
+        this.resetTotals();
 
-    Object.keys(staff.attendance).forEach((day: any) => {
-      const att = staff.attendance[day];
+        Object.keys(staff.attendance).forEach((day: any) => {
+          const att = staff.attendance[day];
 
-      this.attendanceDays.push({
-        day,
-        status: att.attendance || '—',
-        time: att.time || '—'
-      });
+          this.attendanceDays.push({
+            day,
+            status: att.attendance || '—',
+            time: att.time || '—'
+          });
 
-      if (att.attendance === 'Present') this.totalPresent++;
-      else if (att.attendance === 'Absent') this.totalAbsent++;
-   else if (
-  att.attendance === 'HalfDay' ||
-  att.attendance === 'Half Day'
-) {
-  this.totalHalfDay++;
-}
+          if (att.attendance === 'Present') this.totalPresent++;
+          else if (att.attendance === 'Absent') this.totalAbsent++;
+          else if (
+            att.attendance === 'HalfDay' ||
+            att.attendance === 'Half Day'
+          ) {
+            this.totalHalfDay++;
+          }
 
-      else if (att.attendance === 'PaidLeave') this.totalPaidLeave++;
+          else if (att.attendance === 'PaidLeave' || att.attendance === 'Paid Leave') this.totalPaidLeave++;
+        });
+
+        // 🔥 Backend Salary calculation
+        this.fetchCalculatedSalary();
+      }
+    });
+  }
+
+  fetchCalculatedSalary() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
 
-    // 🔥 YAHI par salary calculate karo
-    this.calculateSalary();
+    this.http.get<any>(
+      `http://localhost:5000/api/admin/staff/calculate-salary?staffId=${this.staffId}&month=${this.selectedMonth}&year=${this.selectedYear}`,
+      { headers }
+    ).subscribe({
+      next: (res) => {
+        this.calculatedSalary = res.calculatedSalary;
+        this.monthlySalary = res.currentBaseSalary;
+        this.perDaySalary = res.currentBaseSalary / this.getDaysInMonth(this.selectedMonth, this.selectedYear);
+      }
+    });
   }
-});
 
+  getStaffKhatabook() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
 
+    this.http.get<any>(
+      `http://localhost:5000/api/admin/staff/khatabook/get-details?staffId=${this.staffId}`,
+      { headers }
+    ).subscribe({
+      next: (res) => {
+        this.khatabookData = res.khatabook;
+      },
+      error: () => {
+        this.khatabookData = null;
+      }
+    });
   }
+
+  openTransactionModal(type: 'given' | 'taken') {
+    this.transactionType = type;
+    this.showTransactionModal = true;
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  addTransaction() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const formData = new FormData();
+    formData.append('staffId', this.staffId);
+    formData.append('type', this.transactionType);
+    formData.append('Rs', this.transactionForm.Rs.toString());
+    formData.append('paymentMode', this.transactionForm.paymentMode);
+    formData.append('description', this.transactionForm.description);
+    if (this.transactionForm.hotelBranchName) formData.append('hotelBranchName', this.transactionForm.hotelBranchName);
+    if (this.transactionForm.billno) formData.append('billno', this.transactionForm.billno.toString());
+    if (this.transactionForm.returnDate) formData.append('returnDate', this.transactionForm.returnDate);
+    if (this.selectedFile) {
+      formData.append('paymentScreenshoot', this.selectedFile);
+    }
+
+    this.http.post<any>(
+      `http://localhost:5000/api/admin/staff/khatabook/add-transaction`,
+      formData,
+      { headers }
+    ).subscribe({
+      next: () => {
+        this.showTransactionModal = false;
+        this.getStaffKhatabook();
+        // Reset form
+        this.transactionForm = {
+          Rs: 0,
+          paymentMode: 'cash',
+          description: '',
+          hotelBranchName: '',
+          billno: null,
+          returnDate: null
+        };
+        this.selectedFile = null;
+      }
+    });
+  }
+
   resetTotals() {
     this.totalPresent = 0;
     this.totalAbsent = 0;
@@ -145,26 +252,8 @@ getStaffDetail() {
   }
 
   getDaysInMonth(month: number, year: number): number {
-  return new Date(year, month, 0).getDate();
-}
-calculateSalary() {
-  if (!this.staffData?.salary) {
-    this.calculatedSalary = 0;
-    return;
+    return new Date(year, month, 0).getDate();
   }
 
-  const totalDays = this.getDaysInMonth(
-    this.selectedMonth,
-    this.selectedYear
-  );
-
-  this.monthlySalary = this.staffData.salary;
-  this.perDaySalary = this.staffData.salary / totalDays;
-
-  this.calculatedSalary =
-    (this.totalPresent * this.perDaySalary) +
-    (this.totalPaidLeave * this.perDaySalary) +
-    (this.totalHalfDay * (this.perDaySalary / 2));
-}
 
 }
